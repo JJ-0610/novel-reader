@@ -104,6 +104,9 @@ button{cursor:pointer}
 #rbot .st{font-size:12px;opacity:.65;margin-top:4px}
 #reader.hide-chrome #rtop{transform:translateY(-100%);opacity:0;pointer-events:none}
 #reader.hide-chrome #rbot{transform:translateY(100%);opacity:0;pointer-events:none}
+#reader.paged #page{overflow:hidden;touch-action:manipulation}
+#reader.paged #text{max-width:none;margin:0;column-fill:auto;padding-bottom:calc(var(--sab) + 24px)}
+#reader.paged #text p{orphans:1;widows:1}
 
 /* 시트 */
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:20}
@@ -138,7 +141,9 @@ button{cursor:pointer}
   background:#1D2230;color:#fff;border-radius:12px;padding:12px 14px;font-family:var(--ui);font-size:14px;
   display:flex;gap:12px;align-items:center;max-width:calc(100vw - 32px);box-shadow:0 6px 24px rgba(0,0,0,.25)}
 #toast button{border:0;background:transparent;color:#B9C8F2;font-weight:600;padding:4px 6px}
-@media (prefers-reduced-motion:reduce){ .chrome{transition:none} }
+#syncBtn.busy svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(-360deg)}}
+@media (prefers-reduced-motion:reduce){ .chrome{transition:none} #syncBtn.busy svg{animation:none;opacity:.4} }
 </style>
 </head>
 <body>
@@ -184,6 +189,7 @@ button{cursor:pointer}
   <header id="rtop" class="chrome">
     <button class="icon-btn" id="backBtn" aria-label="서재로"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
     <div class="t" id="bookTitle"></div>
+    <button class="icon-btn" id="syncBtn" aria-label="지금 동기화"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 21v-5h-5"/></svg></button>
     <button class="icon-btn" id="styleBtn" aria-label="보기 설정"><svg viewBox="0 0 24 24"><path d="M3 19l5-14 5 14"/><path d="M5 14h6"/><path d="M15 19l3.5-9 3.5 9"/><path d="M16.3 16h4.4"/></svg></button>
   </header>
   <footer id="rbot" class="chrome">
@@ -199,6 +205,8 @@ button{cursor:pointer}
 <div class="scrim" id="styleScrim" hidden></div>
 <div class="sheet" id="styleSheet" role="dialog" aria-label="보기 설정" hidden>
   <div class="grab"></div>
+  <div class="field"><span class="lbl">넘기는 방식</span><div class="chips" id="modeChips">
+    <button data-mode="page">페이지 넘김</button><button data-mode="scroll">스크롤</button></div></div>
   <div class="field"><span class="lbl">글꼴</span><div class="chips" id="fontChips"></div></div>
   <div class="field"><span class="lbl">글자 크기</span>
     <div class="step"><button data-k="size" data-d="-1" aria-label="작게">−</button><output id="o-size"></output><button data-k="size" data-d="1" aria-label="크게">+</button></div></div>
@@ -213,7 +221,7 @@ button{cursor:pointer}
       <label>글자 <input type="color" id="fgPick"></label>
     </div>
   </div>
-  <div class="field"><label class="toggle">화면 왼쪽·오른쪽을 눌러 한 화면씩 넘기기 <input type="checkbox" id="tapToggle"></label></div>
+  <div class="field" id="tapField"><label class="toggle">화면 왼쪽·오른쪽을 눌러 한 화면씩 넘기기 <input type="checkbox" id="tapToggle"></label></div>
 </div>
 
 <!-- 계정 시트 -->
@@ -232,7 +240,8 @@ button{cursor:pointer}
 
 <script>
 'use strict';
-const CH = 300;                // 한 번에 그리는 줄 묶음
+const CH = 300;                // 스크롤 모드: 한 번에 그리는 줄 묶음
+const CHP = 400;               // 페이지 모드: 한 번에 그리는 줄 묶음
 const PUSH_EVERY = 3 * 60 * 1000;  // 읽는 중 자동 저장 간격
 const $ = s => document.querySelector(s);
 
@@ -259,7 +268,7 @@ const THEMES = [
   { name: '밤', bg: '#16191E', fg: '#B8BCB4' },
   { name: '먹', bg: '#000000', fg: '#8F8F8F' }
 ];
-const DEF = { font: 'NotoSerifKR', size: 19, lh: 1.8, margin: 22, bg: '#FFFFFF', fg: '#1F1F1F', tap: true, t: 0 };
+const DEF = { font: 'NotoSerifKR', size: 19, lh: 1.8, margin: 22, bg: '#FFFFFF', fg: '#1F1F1F', tap: true, mode: 'page', t: 0 };
 const LIM = { size: [12, 36], lh: [1.3, 2.6], margin: [8, 48] };
 
 const S = {
@@ -519,9 +528,9 @@ $('#refreshBtn').onclick = () => { loadFolder(); pullProg().then(renderRecent).c
 const page = $('#page'), textEl = $('#text');
 function chunkEl(k) {
   const d = document.createElement('div'); d.className = 'chunk';
-  const lines = S.book.lines, end = Math.min((k + 1) * CH, lines.length);
+  const C = chunkSize(), lines = S.book.lines, end = Math.min((k + 1) * C, lines.length);
   const f = document.createDocumentFragment();
-  for (let i = k * CH; i < end; i++) {
+  for (let i = k * C; i < end; i++) {
     const p = document.createElement('p'); p.dataset.i = i;
     const t = lines[i];
     if (t.trim() === '') p.className = 'blank'; else p.textContent = t;
@@ -529,6 +538,49 @@ function chunkEl(k) {
   }
   d.appendChild(f); return d;
 }
+const paged = () => S.set.mode !== 'scroll';
+const chunkSize = () => paged() ? CHP : CH;
+
+/* 페이지 모드: 다단(column)으로 화면 너비마다 한 쪽씩 배치. 줄은 쪽 경계에서 잘리지 않음 */
+let PG = { W: 1, pm: 0 };
+function layoutPaged() {
+  const t = textEl.style;
+  if (!paged()) {
+    for (const k of ['width', 'height', 'columnWidth', 'columnGap', 'paddingLeft', 'paddingRight']) t[k] = '';
+    page.scrollLeft = 0; return;
+  }
+  const W = page.clientWidth, H = page.clientHeight;
+  const pm = Math.max(S.set.margin, Math.floor((W - S.set.size * 40) / 2));
+  PG = { W, pm };
+  t.width = W + 'px'; t.height = H + 'px';
+  t.paddingLeft = t.paddingRight = pm + 'px';
+  t.columnWidth = (W - 2 * pm) + 'px'; t.columnGap = (2 * pm) + 'px';
+}
+const pageCount = () => Math.max(1, Math.ceil((page.scrollWidth - 2) / PG.W));
+const curPage = () => Math.round(page.scrollLeft / PG.W);
+const setPage = i => { page.scrollLeft = i * PG.W; };
+function renderPagedChunk(k) {
+  page.scrollLeft = 0;
+  textEl.textContent = '';
+  S.first = S.last = k;
+  textEl.appendChild(chunkEl(k));
+}
+function turn(d) {
+  const nk = Math.ceil(S.book.lines.length / CHP);
+  let idx = curPage() + d;
+  if (idx >= pageCount()) {
+    if (S.first >= nk - 1) { toast('마지막 페이지입니다.'); return; }
+    renderPagedChunk(S.first + 1); idx = 0;
+  } else if (idx < 0) {
+    if (S.first <= 0) return;
+    renderPagedChunk(S.first - 1); idx = pageCount() - 1;
+  }
+  setPage(idx);
+  S.book.moved = true;
+  const p = getPos(); if (p) updatePct(pctOf(p.i));
+  clearTimeout(recTimer); recTimer = setTimeout(recordPos, 700);
+}
+
 function renderAround(k) {
   const n = Math.ceil(S.book.lines.length / CH);
   textEl.textContent = '';
@@ -536,7 +588,7 @@ function renderAround(k) {
   for (let j = S.first; j <= S.last; j++) textEl.appendChild(chunkEl(j));
 }
 function extendWindow() {
-  if (!S.book) return;
+  if (!S.book || paged()) return;
   const n = Math.ceil(S.book.lines.length / CH), vh = page.clientHeight;
   if (page.scrollTop + vh > page.scrollHeight - 1.5 * vh && S.last < n - 1) {
     S.last++; textEl.appendChild(chunkEl(S.last));
@@ -551,6 +603,21 @@ function extendWindow() {
 }
 function getPos() {
   if (!S.book) return null;
+  if (paged()) {
+    const r = page.getBoundingClientRect(), x = r.left + PG.pm + 3;
+    const y0 = r.top + parseFloat(getComputedStyle(textEl).paddingTop) + 2;
+    for (let y = y0; y < r.bottom - 8; y += 6) {
+      const p = document.elementsFromPoint(x, y).find(el => el.tagName === 'P' && el.dataset.i != null);
+      if (p) {
+        const rects = [...p.getClientRects()].filter(q => q.height > 0);
+        const total = rects.reduce((a, q) => a + q.height, 0);
+        const before = rects.filter(q => q.left < r.left - 1).reduce((a, q) => a + q.height, 0);
+        return { i: +p.dataset.i, f: total ? before / total : 0 };
+      }
+    }
+    const first = textEl.querySelector('p[data-i]');
+    return first ? { i: +first.dataset.i, f: 0 } : { i: 0, f: 0 };
+  }
   const r = page.getBoundingClientRect(), x = r.left + r.width / 2;
   for (let y = r.top + 2; y < r.top + Math.min(240, r.height); y += 6) {
     const p = document.elementsFromPoint(x, y).find(el => el.tagName === 'P' && el.dataset.i != null);
@@ -566,6 +633,21 @@ function getPos() {
 function goTo(i, f) {
   const L = S.book.lines.length;
   i = Math.max(0, Math.min(L - 1, i | 0));
+  S.ignoreScrollUntil = Date.now() + 500;
+  layoutPaged();
+  if (paged()) {
+    renderPagedChunk(Math.floor(i / CHP));
+    const p = textEl.querySelector('p[data-i="' + i + '"]');
+    if (p) {
+      const rects = [...p.getClientRects()].filter(q => q.height > 0);
+      const total = rects.reduce((a, q) => a + q.height, 0);
+      let acc = 0, target = rects[0];
+      for (const q of rects) { target = q; acc += q.height; if (!total || acc / total > (f || 0) + 1e-6) break; }
+      if (target) setPage(Math.max(0, Math.floor((target.left - page.getBoundingClientRect().left + 2) / PG.W)));
+    }
+    updatePct(pctOf(i));
+    return;
+  }
   renderAround(Math.floor(i / CH));
   const p = textEl.querySelector('p[data-i="' + i + '"]');
   page.scrollTop = 0;
@@ -582,7 +664,8 @@ function updatePct(p) {
 /* ---------- 리더: 위치 기록 ---------- */
 let recTimer = 0, pushTimer = 0;
 function recordPos() {
-  if (!S.book || S.book.loading) return;
+  if (!S.book || S.book.loading || !S.book.moved) return;   // 직접 넘긴 적이 없으면 기록하지 않음(다른 기기 기록 보호)
+  S.book.moved = false;
   const p = getPos(); if (!p) return;
   const prev = S.prog.files[S.book.id];
   if (prev && prev.i === p.i && Math.abs((prev.f || 0) - p.f) < 0.02) return;
@@ -590,7 +673,8 @@ function recordPos() {
   LS.set('prog', S.prog); markDirty();
 }
 page.addEventListener('scroll', () => {
-  if (!S.book || S.book.loading) return;
+  if (!S.book || S.book.loading || paged()) return;
+  if (Date.now() > (S.ignoreScrollUntil || 0)) S.book.moved = true;
   extendWindow();
   const p = getPos(); if (p) updatePct(pctOf(p.i));
   clearTimeout(recTimer); recTimer = setTimeout(recordPos, 700);
@@ -637,6 +721,27 @@ function closeBook() {
   openLibrary();
 }
 $('#backBtn').onclick = closeBook;
+$('#syncBtn').onclick = async () => {
+  const btn = $('#syncBtn');
+  if (!S.book || S.book.loading || btn.classList.contains('busy')) return;
+  btn.classList.add('busy');
+  const book = S.book;
+  recordPos();
+  const mine = S.prog.files[book.id];
+  try {
+    await pushProg();      // 남은 저장 먼저 처리
+    await pullProg();      // 다른 기기 기록 받아서 합치기
+    markDirty(); await pushProg();
+    if (syncState.s === 'fail') throw new Error(syncState.msg);
+    const r = S.prog.files[book.id];
+    const cur = getPos();
+    if (book === S.book && r && cur && r !== mine && (r.t || 0) > ((mine && mine.t) || 0) && Math.abs(r.i - cur.i) > 2)
+      toast('다른 기기에서 ' + (r.pct || 0).toFixed(1) + '%까지 읽었습니다.', '이동', () => { goTo(r.i, r.f); S.book.moved = true; recordPos(); });
+    else toast('동기화했습니다.');
+  } catch (e) {
+    if (!onAuthFail(e)) toast(e instanceof ApiErr ? errMsg(e) : '동기화 실패: ' + e.message);
+  } finally { btn.classList.remove('busy'); }
+};
 
 /* ---------- 리더: 조작 ---------- */
 let seeking = false;
@@ -645,21 +750,38 @@ $('#seek').addEventListener('change', e => {
   seeking = false;
   if (!S.book || S.book.loading) return;
   goTo(Math.round(e.target.value / 1000 * (S.book.lines.length - 1)), 0);
-  recordPos();
+  S.book.moved = true; recordPos();
 });
 function pageBy(d) {
+  if (paged()) return turn(d);
   const lh = S.set.size * S.set.lh;
   page.scrollBy(0, d * Math.max(80, page.clientHeight - lh * 1.5));
 }
+let touch0 = null, swiped = false;
+page.addEventListener('touchstart', e => {
+  if (!paged() || e.touches.length !== 1) { touch0 = null; return; }
+  touch0 = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+}, { passive: true });
+page.addEventListener('touchend', e => {
+  if (!touch0 || !S.book || S.book.loading) return;
+  const t = e.changedTouches[0], dx = t.clientX - touch0.x, dy = t.clientY - touch0.y;
+  touch0 = null;
+  if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    swiped = true; setTimeout(() => { swiped = false; }, 400);
+    $('#reader').classList.add('hide-chrome');
+    turn(dx < 0 ? 1 : -1);
+  }
+}, { passive: true });
 page.addEventListener('click', e => {
-  if (!S.book || S.book.loading) return;
+  if (!S.book || S.book.loading || swiped) return;
   const sel = window.getSelection && window.getSelection();
   if (sel && String(sel).length) return;
   const R = $('#reader');
   if (!R.classList.contains('hide-chrome')) { R.classList.add('hide-chrome'); return; }
   const w = page.clientWidth, x = e.clientX - page.getBoundingClientRect().left;
-  if (S.set.tap && x < w * 0.3) pageBy(-1);
-  else if (S.set.tap && x > w * 0.7) pageBy(1);
+  const tap = paged() || S.set.tap;
+  if (tap && x < w * 0.3) pageBy(-1);
+  else if (tap && x > w * 0.7) pageBy(1);
   else R.classList.remove('hide-chrome');
 });
 document.addEventListener('keydown', e => {
@@ -693,6 +815,9 @@ function applySettings() {
   $('#o-margin').textContent = s.margin + 'px';
   $('#bgPick').value = s.bg; $('#fgPick').value = s.fg;
   $('#tapToggle').checked = !!s.tap;
+  $('#reader').classList.toggle('paged', paged());
+  $('#tapField').hidden = paged();
+  for (const b of $('#modeChips').children) b.setAttribute('aria-pressed', b.dataset.mode === (paged() ? 'page' : 'scroll'));
   for (const b of $('#fontChips').children) b.setAttribute('aria-pressed', b.dataset.font === s.font);
   for (const b of $('#themeSw').children) b.setAttribute('aria-pressed', b.dataset.bg === s.bg && b.dataset.fg === s.fg);
 }
@@ -727,6 +852,15 @@ $('#styleSheet').addEventListener('click', e => {
 $('#bgPick').onchange = e => changeSetting({ bg: e.target.value.toUpperCase() });
 $('#fgPick').onchange = e => changeSetting({ fg: e.target.value.toUpperCase() });
 $('#tapToggle').onchange = e => changeSetting({ tap: e.target.checked });
+$('#modeChips').onclick = e => { const b = e.target.closest('button'); if (b) changeSetting({ mode: b.dataset.mode }); };
+let resizeTimer = 0;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if (!S.book || S.book.loading || $('#reader').hidden) return;
+    const keep = getPos(); if (keep) goTo(keep.i, keep.f);
+  }, 200);
+});
 
 /* ---------- 시트 ---------- */
 function openSheet(n) { $('#' + n + 'Scrim').hidden = false; $('#' + n + 'Sheet').hidden = false; }
@@ -779,8 +913,9 @@ document.addEventListener('visibilitychange', async () => {
   if (!$('#library').hidden) renderRecent();
   if (!book || book !== S.book || book.loading) return;
   const r = S.prog.files[book.id];
-  if (r && mine && r !== mine && r.t > mine.t && Math.abs(r.i - mine.i) > 2)
-    toast('다른 기기에서 ' + r.pct.toFixed(1) + '%까지 읽었습니다.', '이동', () => { goTo(r.i, r.f); recordPos(); });
+  const cur = getPos();
+  if (r && cur && r !== mine && r.t > ((mine && mine.t) || 0) && Math.abs(r.i - cur.i) > 2)
+    toast('다른 기기에서 ' + r.pct.toFixed(1) + '%까지 읽었습니다.', '이동', () => { goTo(r.i, r.f); S.book.moved = true; recordPos(); });
 });
 window.addEventListener('pagehide', () => { if (S.book && !S.book.loading) recordPos(); pushProg(); });
 
