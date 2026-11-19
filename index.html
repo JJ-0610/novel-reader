@@ -143,6 +143,11 @@ button{cursor:pointer}
 #toast button{border:0;background:transparent;color:#B9C8F2;font-weight:600;padding:4px 6px}
 #syncBtn.busy svg{animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(-360deg)}}
+.cache-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.cache-row .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cache-row .s{color:var(--mute);font-variant-numeric:tabular-nums;flex:none}
+.cache-row button{border:1px solid var(--line);background:transparent;border-radius:8px;padding:6px 10px;font-size:13px;flex:none}
+.row .sub .kept{color:var(--accent)}
 @media (prefers-reduced-motion:reduce){ .chrome{transition:none} #syncBtn.busy svg{animation:none;opacity:.4} }
 </style>
 </head>
@@ -234,6 +239,10 @@ button{cursor:pointer}
     <button class="btn" id="syncNowBtn">읽기 기록 지금 동기화</button>
         <button class="btn ghost" id="logoutBtn">이 기기에서 연결 해제</button>
   </div>
+  <h2 style="margin-top:24px">기기에 보관한 소설</h2>
+  <p class="info" id="cacheInfo"></p>
+  <div id="cacheList"></div>
+  <div class="actions"><button class="btn ghost" id="cacheClearBtn">보관한 소설 모두 삭제</button></div>
 </div>
 
 <div id="toast" hidden></div>
@@ -312,10 +321,72 @@ async function listDir(path) {
   const by = (a, b) => natural(a.name) < natural(b.name) ? -1 : 1;
   return {
     folders: vis.filter(x => x.type === 'dir').map(x => ({ name: x.name })).sort(by),
-    files: vis.filter(x => x.type === 'file' && /\.txt$/i.test(x.name)).map(x => ({ name: x.name, size: x.size })).sort(by)
+    files: vis.filter(x => x.type === 'file' && /\.txt$/i.test(x.name)).map(x => ({ name: x.name, size: x.size, sha: x.sha })).sort(by)
   };
 }
 const downloadBuf = path => gh('GET', contents(path), { accept: 'application/vnd.github.raw+json', raw: true });
+const fileSha = async path => (await gh('GET', contents(path), { accept: 'application/vnd.github.object+json' })).sha;
+
+/* ---------- 기기 보관(IndexedDB) ---------- */
+const IDB = (() => {
+  let dbp = null;
+  const open = () => dbp || (dbp = new Promise((res, rej) => {
+    const r = indexedDB.open('viewer', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('books', { keyPath: 'key' });
+    r.onsuccess = () => res(r.result); r.onerror = () => { dbp = null; rej(r.error); };
+  }));
+  const run = async (mode, fn) => {
+    const db = await open();
+    return new Promise((res, rej) => {
+      const t = db.transaction('books', mode), q = fn(t.objectStore('books'));
+      t.oncomplete = () => res(q && q.result); t.onerror = t.onabort = () => rej(t.error);
+    });
+  };
+  return {
+    get: k => run('readonly', st => st.get(k)),
+    put: v => run('readwrite', st => st.put(v)),
+    del: k => run('readwrite', st => st.delete(k)),
+    clear: () => run('readwrite', st => st.clear())
+  };
+})();
+// 목록 표시용 요약(파일 내용은 IndexedDB에만 저장)
+S.cache = LS.get('cache', {});
+const cacheKey = path => S.repo + ':' + path;
+async function keepBook(path, name, sha, buf) {
+  try {
+    await IDB.put({ key: cacheKey(path), path, name, sha, size: buf.byteLength, at: Date.now(), buf });
+    S.cache[cacheKey(path)] = { path, name, sha, size: buf.byteLength, at: Date.now() };
+    LS.set('cache', S.cache);
+    if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+  } catch {}   // 저장공간 부족 등: 보관만 건너뜀
+}
+async function dropBook(key) {
+  try { await IDB.del(key); } catch {}
+  delete S.cache[key]; LS.set('cache', S.cache);
+}
+/* 기기 보관본이 최신이면 그대로, 아니면 새로 받기. 오프라인이면 보관본 사용 */
+async function loadBook(path, name, knownSha) {
+  const key = cacheKey(path);
+  let kept = null;
+  try { kept = S.cache[key] ? await IDB.get(key) : null; } catch {}
+  let sha = knownSha || null;
+  if (!sha) {
+    try { sha = await fileSha(path); }
+    catch (e) {
+      if (kept && e instanceof ApiErr && e.kind === 'network') return { buf: kept.buf, from: 'offline' };
+      throw e;
+    }
+  }
+  if (kept && kept.sha === sha) return { buf: kept.buf, from: 'kept' };
+  let buf;
+  try { buf = await downloadBuf(path); }
+  catch (e) {
+    if (kept && e instanceof ApiErr && e.kind === 'network') return { buf: kept.buf, from: 'offline' };
+    throw e;
+  }
+  await keepBook(path, name, sha, buf);
+  return { buf, from: kept ? 'updated' : 'download' };
+}
 
 const b64ToText = b => { const bin = atob(b.replace(/\s/g, '')); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new TextDecoder().decode(u); };
 const textToB64 = t => { const u = new TextEncoder().encode(t); let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); };
@@ -491,15 +562,17 @@ async function loadFolder() {
     if (seq !== listSeq) return;
     const join = n => (cur.id ? cur.id + '/' : '') + n;
     const folders = d.folders.map(f => ({ resourceId: join(f.name), name: f.name }));
-    const books = d.files.map(f => ({ resourceId: join(f.name), name: f.name, size: f.size }));
+    const books = d.files.map(f => ({ resourceId: join(f.name), name: f.name, size: f.size, sha: f.sha }));
     if (!folders.length && !books.length) { box.innerHTML = '<p class="empty">이 폴더에 txt 파일이나 하위 폴더가 없습니다. GitHub 저장소에 txt 파일을 올리세요.</p>'; return; }
     box.innerHTML = folders.map(f =>
       `<button class="row" data-folder="${esc(f.resourceId)}" data-name="${esc(f.name)}">${ICON_FOLDER}
         <span class="main"><span class="name">${esc(f.name)}</span></span></button>`).join('') +
       books.map(f => {
         const r = S.prog.files[f.resourceId];
-        return `<button class="row" data-open="${esc(f.resourceId)}" data-name="${esc(f.name)}">${ICON_BOOK}
-          <span class="main"><span class="name">${esc(f.name)}</span><span class="sub">${fmtSize(f.size || 0)}</span></span>
+        const c = S.cache[cacheKey(f.resourceId)];
+        const tag = !c ? '' : c.sha === f.sha ? ' · <span class="kept">기기에 보관됨</span>' : ' · 새 버전 있음';
+        return `<button class="row" data-open="${esc(f.resourceId)}" data-name="${esc(f.name)}" data-sha="${esc(f.sha || '')}">${ICON_BOOK}
+          <span class="main"><span class="name">${esc(f.name)}</span><span class="sub">${fmtSize(f.size || 0)}${tag}</span></span>
           ${r ? `<span class="pct">${(r.pct || 0).toFixed(1)}%</span>` : ''}</button>`;
       }).join('');
   } catch (e) {
@@ -519,7 +592,7 @@ $('#library').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   if (b.dataset.folder) { S.nav.push({ id: b.dataset.folder, name: b.dataset.name }); LS.set('nav', S.nav); loadFolder(); }
   else if (b.dataset.crumb != null) { S.nav = S.nav.slice(0, +b.dataset.crumb + 1); LS.set('nav', S.nav); loadFolder(); }
-  else if (b.dataset.open) openBook(b.dataset.open, b.dataset.name);
+  else if (b.dataset.open) openBook(b.dataset.open, b.dataset.name, b.dataset.sha);
   else if (b.hasAttribute('data-retry')) loadFolder();
 });
 $('#refreshBtn').onclick = () => { loadFolder(); pullProg().then(renderRecent).catch(e => setSync('fail', errMsg(e))); };
@@ -681,7 +754,7 @@ page.addEventListener('scroll', () => {
 }, { passive: true });
 
 /* ---------- 리더: 열기·닫기 ---------- */
-async function openBook(id, name) {
+async function openBook(id, name, sha) {
   const seq = ++S.openSeq;
   S.book = { id, name, lines: [''], loading: true };
   textEl.textContent = '';
@@ -690,13 +763,16 @@ async function openBook(id, name) {
   $('#reader').classList.add('hide-chrome');
   show('reader');
   try {
-    const [buf] = await Promise.all([
-      downloadBuf(id),
+    const kept = S.cache[cacheKey(id)];
+    if (!kept || (sha && kept.sha !== sha)) $('#loading').textContent = '내려받는 중…' + (kept ? ' (새 버전)' : '');
+    const [got] = await Promise.all([
+      loadBook(id, name, sha),
       pullProg().catch(e => { if (e.status === 401) throw e; }),
       ensureFont(S.set.font)
     ]);
     if (seq !== S.openSeq) return;
-    S.book.lines = decodeText(buf).replace(/\r\n?/g, '\n').split('\n');
+    if (got.from === 'offline') toast('인터넷 연결이 없어 기기에 보관된 내용으로 엽니다.');
+    S.book.lines = decodeText(got.buf).replace(/\r\n?/g, '\n').split('\n');
     S.book.loading = false;
     $('#loading').hidden = true;
     const r = S.prog.files[id];
@@ -872,7 +948,27 @@ $('#accountBtn').onclick = () => {
   const n = Object.keys(S.prog.files || {}).length;
   $('#accInfo').textContent = `저장소 ${S.repo}의 ${PROG_PATH} 파일에 읽던 위치 ${n}건과 보기 설정을 저장합니다. ` +
     (syncState.s === 'fail' ? '마지막 저장 실패: ' + syncState.msg : '');
+  renderCache();
   openSheet('acc');
+};
+function renderCache() {
+  const items = Object.entries(S.cache).filter(([k]) => k.startsWith(S.repo + ':')).sort((a, b) => b[1].at - a[1].at);
+  const total = items.reduce((a, [, c]) => a + (c.size || 0), 0);
+  $('#cacheInfo').textContent = items.length
+    ? `${items.length}개, ${fmtSize(total)}. 한 번 받은 소설은 다음부터 내려받지 않고 바로 엽니다. 저장소에서 파일이 바뀌면 다시 받습니다.`
+    : '아직 보관한 소설이 없습니다. 소설을 열면 자동으로 보관됩니다.';
+  $('#cacheList').innerHTML = items.map(([k, c]) =>
+    `<div class="cache-row"><span class="n">${esc(c.name)}</span><span class="s">${fmtSize(c.size || 0)}</span><button data-drop="${esc(k)}">삭제</button></div>`).join('');
+  $('#cacheClearBtn').hidden = !items.length;
+}
+$('#cacheList').onclick = async e => {
+  const b = e.target.closest('button[data-drop]'); if (!b) return;
+  await dropBook(b.dataset.drop); renderCache(); if (!$('#library').hidden) loadFolder();
+};
+$('#cacheClearBtn').onclick = async () => {
+  if (!confirm('기기에 보관한 소설을 모두 삭제합니다. 저장소의 원본과 읽기 기록은 그대로입니다.')) return;
+  try { await IDB.clear(); } catch {}
+  S.cache = {}; LS.set('cache', S.cache); renderCache(); if (!$('#library').hidden) loadFolder();
 };
 $('#syncNowBtn').onclick = async () => {
   $('#syncNowBtn').disabled = true;
@@ -881,9 +977,11 @@ $('#syncNowBtn').onclick = async () => {
   finally { $('#syncNowBtn').disabled = false; closeSheets(); }
 };
 $('#logoutBtn').onclick = async () => {
-  if (!confirm('이 기기에서 연결을 해제합니다. 저장소에 저장된 읽기 기록은 남습니다.')) return;
+  if (!confirm('이 기기에서 연결을 해제합니다. 기기에 보관한 소설도 삭제됩니다. 저장소의 원본과 읽기 기록은 남습니다.')) return;
   await pushProg();
-  for (const k of ['token', 'prog', 'dirty', 'nav']) LS.del(k);
+  try { await IDB.clear(); } catch {}
+  S.cache = {};
+  for (const k of ['token', 'prog', 'dirty', 'nav', 'cache']) LS.del(k);
   S.token = ''; S.prog = { v: 1, files: {} }; S.dirty = false; S.pulled = false; S.progSha = null;
   S.nav = [{ id: '', name: '소설' }];
   showSetup('');
