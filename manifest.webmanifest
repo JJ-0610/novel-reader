@@ -1,6 +1,6 @@
 {
-  "name": "소설뷰어",
-  "short_name": "소설뷰어",
+  "name": "Viewer",
+  "short_name": "Viewer",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
