@@ -149,6 +149,62 @@ button{cursor:pointer}
 .cache-row button{border:1px solid var(--line);background:transparent;border-radius:8px;padding:6px 10px;font-size:13px;flex:none}
 .row .sub .kept{color:var(--accent)}
 @media (prefers-reduced-motion:reduce){ .chrome{transition:none} #syncBtn.busy svg{animation:none;opacity:.4} }
+/* ---- v2 추가 ---- */
+#page{position:relative}
+#pdfView{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:12px;
+  padding:calc(var(--sat) + 8px) 8px calc(var(--sab) + 8px)}
+#pdfView canvas{background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.18);max-width:100%}
+#pdfView.inv canvas{filter:invert(.9) hue-rotate(180deg)}
+#reader.pdfpage #page{overflow:hidden;touch-action:manipulation}
+#text p.h{font-weight:700;font-size:1.18em;padding:.9em 0 .5em;break-after:avoid}
+#text p.img{padding:.4em 0;break-inside:avoid;text-align:center}
+#text p.img img{max-width:100%;max-height:80vh;height:auto;display:block;margin:0 auto}
+#reader.paged #text p.img img{max-height:var(--colh,70vh)}
+#text .hl{border-radius:2px;cursor:pointer;color:inherit}
+.hl-y{background:rgba(255,212,0,.38)} .hl-g{background:rgba(70,200,90,.32)}
+.hl-b{background:rgba(70,140,255,.30)} .hl-p{background:rgba(255,90,170,.30)}
+#text .hl.memo{text-decoration:underline dotted;text-underline-offset:3px}
+#text mark.find{background:rgba(255,150,0,.6);color:inherit;border-radius:2px}
+#selBar{position:fixed;z-index:26;display:flex;gap:6px;align-items:center;background:#1D2230;color:#fff;
+  border-radius:12px;padding:6px 8px;box-shadow:0 6px 20px rgba(0,0,0,.3);font-family:var(--ui)}
+#selBar button{border:0;border-radius:50%;width:32px;height:32px;padding:0}
+#selBar .sw-y{background:#FFD400} #selBar .sw-g{background:#46C85A} #selBar .sw-b{background:#468CFF} #selBar .sw-p{background:#FF5AAA}
+#selBar .memo-b{border-radius:8px;width:auto;padding:0 10px;background:transparent;color:#fff;font-size:14px}
+.tabs{display:flex;gap:6px;margin:2px 0 8px}
+.tabs button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:7px 14px;font-size:14px}
+.tabs button[aria-selected=true]{border-color:var(--accent);color:var(--accent);font-weight:600}
+.li{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line)}
+.li .go{flex:1;min-width:0;text-align:left;border:0;background:transparent;padding:11px 2px;font-size:15px;line-height:1.45}
+.li .go small{display:block;color:var(--mute);font-size:12px;margin-top:2px;font-variant-numeric:tabular-nums}
+.li .go.cur{color:var(--accent);font-weight:600}
+.li .x{border:1px solid var(--line);background:transparent;border-radius:8px;padding:5px 9px;font-size:13px;flex:none}
+.li .dot{width:10px;height:10px;border-radius:50%;flex:none}
+.dot.c-y{background:#FFD400}.dot.c-g{background:#46C85A}.dot.c-b{background:#468CFF}.dot.c-p{background:#FF5AAA}.dot.c-bm{background:var(--mute)}
+.quote{border-left:3px solid var(--line);padding:4px 10px;color:var(--mute);font-size:14px;line-height:1.6;max-height:7.5em;overflow:auto;margin:6px 0 10px}
+.sheet textarea,.sheet input[type=search],.sheet input[type=time]{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--paper);font-size:16px}
+.sheet textarea{min-height:96px;resize:vertical}
+.findrow{display:flex;gap:8px}
+.findrow .btn{flex:none;padding:10px 16px}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:2px dashed var(--line);
+  border-radius:12px;padding:22px 12px;cursor:pointer;text-align:center;margin:8px 0}
+.drop b{color:var(--accent)} .drop span{font-size:13px;color:var(--mute)}
+.drop.over{border-color:var(--accent)}
+.up-row{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;align-items:center}
+.up-row .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.up-row .s{color:var(--mute);font-variant-numeric:tabular-nums;flex:none}
+.up-row .st{flex:none;color:var(--mute)} .up-row .st.err{color:var(--warn)} .up-row .st.ok{color:var(--accent)}
+.libbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0 2px}
+.libbar .crumbs{flex:1;margin:0}
+.mini{border:1px solid var(--line);background:transparent;border-radius:8px;padding:7px 11px;font-size:13px}
+.mini.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.item{display:flex;align-items:center;border-bottom:1px solid var(--line)}
+.item .row{border-bottom:0;flex:1;min-width:0}
+.item .more{width:40px;height:40px;border:0;background:transparent;border-radius:8px;color:var(--mute);font-size:20px;flex:none}
+.row .sub .kind{font-weight:600}
+#dragOver{position:fixed;inset:0;z-index:40;background:rgba(20,30,60,.45);display:grid;place-items:center;color:#fff;font-size:20px;font-weight:600;pointer-events:none}
+.tm{display:flex;gap:10px;align-items:center;margin-top:10px;font-size:14px}
+.tm input{width:auto!important;padding:6px 8px!important}
+@media (prefers-reduced-motion:reduce){ .chrome{transition:none} #syncBtn.busy svg{animation:none;opacity:.4} }
 </style>
 </head>
 <body>
@@ -157,7 +213,7 @@ button{cursor:pointer}
 <section id="setup" class="screen" hidden>
   <div class="wrap">
     <h1>Viewer</h1>
-    <p class="lead">GitHub 비공개 저장소의 txt 소설을 읽고, 읽던 위치를 같은 저장소에 저장해 어느 기기에서든 이어 읽습니다.</p>
+    <p class="lead">GitHub 비공개 저장소의 TXT·EPUB·PDF를 읽고, 읽던 위치를 같은 저장소에 저장해 어느 기기에서든 이어 읽습니다.</p>
     <label for="repoInput">저장소</label>
     <input id="repoInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="GitHub사용자이름/저장소이름">
     <label for="tokenInput">GitHub 토큰</label>
@@ -173,7 +229,7 @@ button{cursor:pointer}
   <div class="top">
     <h1>서재</h1>
     <button class="icon-btn" id="refreshBtn" aria-label="새로고침"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 5v6h-6"/></svg></button>
-    <button class="icon-btn" id="accountBtn" aria-label="동기화와 연결 해제"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+    <button class="icon-btn" id="accountBtn" aria-label="동기화와 연결 해제"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></button>
   </div>
   <div class="body"><div class="inner">
     <div id="recentWrap" hidden>
@@ -181,7 +237,11 @@ button{cursor:pointer}
       <div id="recentList"></div>
     </div>
     <div class="sec-title">폴더</div>
-    <nav class="crumbs" id="crumbs" aria-label="폴더 경로"></nav>
+    <div class="libbar">
+      <nav class="crumbs" id="crumbs" aria-label="폴더 경로"></nav>
+      <button class="mini" id="mkdirBtn">새 폴더</button>
+      <button class="mini primary" id="uploadBtn">파일 올리기</button>
+    </div>
     <div id="folderList"></div>
     <p class="sync" id="libSync"></p>
   </div></div>
@@ -189,11 +249,14 @@ button{cursor:pointer}
 
 <!-- 리더 -->
 <section id="reader" class="screen hide-chrome" hidden>
-  <div id="page" tabindex="0"><div id="text"></div></div>
+  <div id="page" tabindex="0"><div id="text"></div><div id="pdfView" hidden></div></div>
   <div id="loading" hidden></div>
   <header id="rtop" class="chrome">
     <button class="icon-btn" id="backBtn" aria-label="서재로"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
     <div class="t" id="bookTitle"></div>
+    <button class="icon-btn" id="findBtn" aria-label="본문 검색"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l5 5"/></svg></button>
+    <button class="icon-btn" id="bmBtn" aria-label="북마크" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M6.5 3.5h11v17l-5.5-4-5.5 4z"/></svg></button>
+    <button class="icon-btn" id="panelBtn" aria-label="목차·북마크·메모"><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r=".8"/><circle cx="4" cy="12" r=".8"/><circle cx="4" cy="18" r=".8"/></svg></button>
     <button class="icon-btn" id="syncBtn" aria-label="지금 동기화"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 21v-5h-5"/></svg></button>
     <button class="icon-btn" id="styleBtn" aria-label="보기 설정"><svg viewBox="0 0 24 24"><path d="M3 19l5-14 5 14"/><path d="M5 14h6"/><path d="M15 19l3.5-9 3.5 9"/><path d="M16.3 16h4.4"/></svg></button>
   </header>
@@ -206,12 +269,27 @@ button{cursor:pointer}
   </footer>
 </section>
 
-<!-- 보기 설정 시트 -->
+<div id="selBar" hidden>
+  <button class="sw-y" data-c="y" aria-label="노랑 하이라이트"></button>
+  <button class="sw-g" data-c="g" aria-label="초록 하이라이트"></button>
+  <button class="sw-b" data-c="b" aria-label="파랑 하이라이트"></button>
+  <button class="sw-p" data-c="p" aria-label="분홍 하이라이트"></button>
+  <button class="memo-b" data-c="memo">메모</button>
+</div>
+<div id="dragOver" hidden>여기에 놓으면 현재 폴더에 올립니다</div>
+
+<!-- 보기 설정 -->
 <div class="scrim" id="styleScrim" hidden></div>
 <div class="sheet" id="styleSheet" role="dialog" aria-label="보기 설정" hidden>
   <div class="grab"></div>
+  <div class="field" id="pdfField" hidden><span class="lbl">PDF 보기 (이 책만)</span><div class="chips" id="pdfChips">
+    <button data-pdf="page">원본 페이지</button><button data-pdf="text">글자만(TXT처럼)</button></div></div>
   <div class="field"><span class="lbl">넘기는 방식</span><div class="chips" id="modeChips">
     <button data-mode="page">페이지 넘김</button><button data-mode="scroll">스크롤</button></div></div>
+  <div class="field"><span class="lbl">화면을 눌러 넘기는 위치</span><div class="chips" id="axisChips">
+    <button data-axis="x">왼쪽·오른쪽</button><button data-axis="y">위·아래</button></div></div>
+  <div class="field" id="tapField"><label class="toggle">스크롤 모드에서도 화면을 눌러 한 화면씩 넘기기 <input type="checkbox" id="tapToggle"></label></div>
+  <div class="field"><label class="toggle">넓은 가로 화면에서 2쪽 보기 <input type="checkbox" id="spreadToggle"></label></div>
   <div class="field"><span class="lbl">글꼴</span><div class="chips" id="fontChips"></div></div>
   <div class="field"><span class="lbl">글자 크기</span>
     <div class="step"><button data-k="size" data-d="-1" aria-label="작게">−</button><output id="o-size"></output><button data-k="size" data-d="1" aria-label="크게">+</button></div></div>
@@ -226,10 +304,65 @@ button{cursor:pointer}
       <label>글자 <input type="color" id="fgPick"></label>
     </div>
   </div>
-  <div class="field" id="tapField"><label class="toggle">화면 왼쪽·오른쪽을 눌러 한 화면씩 넘기기 <input type="checkbox" id="tapToggle"></label></div>
+  <div class="field"><span class="lbl">자동 다크모드</span><div class="chips" id="darkChips">
+    <button data-dark="off">끔</button><button data-dark="system">시스템 설정 따라</button><button data-dark="time">시간 지정</button></div>
+    <div class="tm" id="darkTimes" hidden><label>시작 <input type="time" id="darkFrom"></label><label>종료 <input type="time" id="darkTo"></label></div>
+  </div>
 </div>
 
-<!-- 계정 시트 -->
+<!-- 목차·북마크·메모 -->
+<div class="scrim" id="panelScrim" hidden></div>
+<div class="sheet" id="panelSheet" role="dialog" aria-label="목차·북마크·메모" hidden>
+  <div class="grab"></div>
+  <div class="tabs" role="tablist">
+    <button data-tab="toc" role="tab">목차</button><button data-tab="bm" role="tab">북마크</button><button data-tab="hl" role="tab">하이라이트·메모</button>
+  </div>
+  <div id="panelBody"></div>
+</div>
+
+<!-- 검색 -->
+<div class="scrim" id="findScrim" hidden></div>
+<div class="sheet" id="findSheet" role="dialog" aria-label="본문 검색" hidden>
+  <div class="grab"></div>
+  <div class="findrow"><input type="search" id="findQ" placeholder="검색어" enterkeyhint="search"><button class="btn" id="findGo">검색</button></div>
+  <p class="info" id="findInfo"></p>
+  <div id="findList"></div>
+</div>
+
+<!-- 메모 편집 -->
+<div class="scrim" id="noteScrim" hidden></div>
+<div class="sheet" id="noteSheet" role="dialog" aria-label="메모" hidden>
+  <div class="grab"></div>
+  <h2 id="noteTitle">메모</h2>
+  <div class="quote" id="noteQuote"></div>
+  <div class="chips" id="noteColors" style="margin-bottom:10px">
+    <button data-c="y">노랑</button><button data-c="g">초록</button><button data-c="b">파랑</button><button data-c="p">분홍</button></div>
+  <textarea id="noteText" placeholder="메모 입력"></textarea>
+  <div class="actions"><button class="btn" id="noteSave">저장</button><button class="btn ghost" id="noteDel">삭제</button></div>
+</div>
+
+<!-- 업로드 -->
+<div class="scrim" id="upScrim" hidden></div>
+<div class="sheet" id="upSheet" role="dialog" aria-label="파일 올리기" hidden>
+  <div class="grab"></div>
+  <h2>파일 올리기</h2>
+  <p class="info" id="upInfo"></p>
+  <label class="drop" id="dropZone"><input type="file" id="fileInput" multiple accept=".txt,.epub,.pdf,text/plain,application/epub+zip,application/pdf" hidden>
+    <b>파일 선택</b><span>TXT·EPUB·PDF, 파일당 100MB까지 · PC는 여기로 끌어다 놓기</span></label>
+  <div id="upList"></div>
+  <div class="actions"><button class="btn" id="upGo" disabled>올리기</button></div>
+</div>
+
+<!-- 파일·폴더 관리 -->
+<div class="scrim" id="itemScrim" hidden></div>
+<div class="sheet" id="itemSheet" role="dialog" aria-label="파일 관리" hidden>
+  <div class="grab"></div>
+  <h2 id="itemName"></h2>
+  <p class="info" id="itemInfo"></p>
+  <div class="actions"><button class="btn ghost" id="itemRename">이름 바꾸기</button><button class="btn ghost" id="itemDelete">삭제</button></div>
+</div>
+
+<!-- 계정 -->
 <div class="scrim" id="accScrim" hidden></div>
 <div class="sheet" id="accSheet" role="dialog" aria-label="동기화와 연결 해제" hidden>
   <div class="grab"></div>
@@ -237,23 +370,29 @@ button{cursor:pointer}
   <p class="info" id="accInfo"></p>
   <div class="actions">
     <button class="btn" id="syncNowBtn">읽기 기록 지금 동기화</button>
-        <button class="btn ghost" id="logoutBtn">이 기기에서 연결 해제</button>
+    <button class="btn ghost" id="logoutBtn">이 기기에서 연결 해제</button>
   </div>
-  <h2 style="margin-top:24px">기기에 보관한 소설</h2>
+  <h2 style="margin-top:24px">기기에 보관한 책</h2>
   <p class="info" id="cacheInfo"></p>
   <div id="cacheList"></div>
-  <div class="actions"><button class="btn ghost" id="cacheClearBtn">보관한 소설 모두 삭제</button></div>
+  <div class="actions"><button class="btn ghost" id="cacheClearBtn">보관한 책 모두 삭제</button></div>
 </div>
 
 <div id="toast" hidden></div>
-
 <script>
 'use strict';
-const CH = 300;                // 스크롤 모드: 한 번에 그리는 줄 묶음
-const CHP = 400;               // 페이지 모드: 한 번에 그리는 줄 묶음
-const PUSH_EVERY = 3 * 60 * 1000;  // 읽는 중 자동 저장 간격
+const CH = 300;                     // 스크롤 모드: 한 번에 그리는 블록 묶음
+const CHP = 400;                    // 페이지 모드: 한 번에 그리는 블록 묶음
+const PUSH_EVERY = 3 * 60 * 1000;   // 읽는 중 자동 저장 간격
+const MAX_UP = 100 * 1024 * 1024;   // 업로드 파일당 상한
+const BOOK_RE = /\.(txt|epub|pdf)$/i;
+const PDFJS = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/';
+const LIBS = {
+  pdf: PDFJS + 'build/pdf.min.js',
+  pdfWorker: PDFJS + 'build/pdf.worker.min.js',
+  zip: 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js'
+};
 const $ = s => document.querySelector(s);
-
 const LS = {
   get(k, d) { try { const v = localStorage.getItem('nr.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem('nr.' + k, JSON.stringify(v)); } catch {} },
@@ -277,25 +416,29 @@ const THEMES = [
   { name: '밤', bg: '#16191E', fg: '#B8BCB4' },
   { name: '먹', bg: '#000000', fg: '#8F8F8F' }
 ];
-const DEF = { font: 'NotoSerifKR', size: 19, lh: 1.8, margin: 22, bg: '#FFFFFF', fg: '#1F1F1F', tap: true, mode: 'page', t: 0 };
+const NIGHT = { bg: '#16191E', fg: '#B8BCB4' };
+const DEF = { font: 'NotoSerifKR', size: 19, lh: 1.8, margin: 22, bg: '#FFFFFF', fg: '#1F1F1F', tap: true, mode: 'page',
+  axis: 'x', spread: false, dark: 'off', darkFrom: '19:00', darkTo: '07:00', t: 0 };
 const LIM = { size: [12, 36], lh: [1.3, 2.6], margin: [8, 48] };
 
 const S = {
   token: LS.get('token', ''),
   repo: LS.get('repo', ''),
+  branch: LS.get('branch', ''),
   progSha: null,
   set: Object.assign({}, DEF, LS.get('settings', {})),
-  prog: LS.get('prog', { v: 1, files: {} }),
-  nav: LS.get('nav', [{ id: '', name: '소설' }]),
+  prog: LS.get('prog', { v: 1, files: {}, notes: {} }),
+  nav: LS.get('nav', [{ id: '', name: '저장소' }]),
   dirty: LS.get('dirty', false), pulled: false, lastPull: 0,
-  book: null, first: 0, last: -1, openSeq: 0
+  book: null, first: 0, last: -1, openSeq: 0, pdfCur: 0
 };
+if (!S.prog.notes) S.prog.notes = {};
+S.nav[0] = { id: '', name: '저장소' };
 
 /* ---------- GitHub API ---------- */
 const GH = 'https://api.github.com';
 const PROG_PATH = '.novelreader/progress.json';
 class ApiErr extends Error { constructor(kind, status, msg) { super(msg); this.kind = kind; this.status = status; } }
-
 const encPath = p => (p || '').split('/').filter(Boolean).map(encodeURIComponent).join('/');
 async function gh(method, path, opt = {}) {
   const h = { Authorization: 'Bearer ' + S.token, Accept: opt.accept || 'application/vnd.github+json' };
@@ -311,8 +454,10 @@ async function gh(method, path, opt = {}) {
   if (opt.raw) return r.arrayBuffer();
   return r.status === 204 ? null : r.json();
 }
-const contents = p => '/repos/' + S.repo + '/contents/' + encPath(p);
+const RP = p => '/repos/' + S.repo + p;
+const contents = p => RP('/contents/' + encPath(p));
 const natural = n => n.replace(/\d+/g, d => d.padStart(10, '0')).toLowerCase();
+const kindOf = name => (name.match(BOOK_RE) || [, ''])[1].toLowerCase();
 
 async function listDir(path) {
   const items = await gh('GET', contents(path));
@@ -321,11 +466,53 @@ async function listDir(path) {
   const by = (a, b) => natural(a.name) < natural(b.name) ? -1 : 1;
   return {
     folders: vis.filter(x => x.type === 'dir').map(x => ({ name: x.name })).sort(by),
-    files: vis.filter(x => x.type === 'file' && /\.txt$/i.test(x.name)).map(x => ({ name: x.name, size: x.size, sha: x.sha })).sort(by)
+    files: vis.filter(x => x.type === 'file' && BOOK_RE.test(x.name)).map(x => ({ name: x.name, size: x.size, sha: x.sha })).sort(by)
   };
 }
 const downloadBuf = path => gh('GET', contents(path), { accept: 'application/vnd.github.raw+json', raw: true });
 const fileSha = async path => (await gh('GET', contents(path), { accept: 'application/vnd.github.object+json' })).sha;
+
+/* ---------- 저장소 파일 조작(Git 데이터 API: 여러 파일을 커밋 1개로) ---------- */
+async function getBranch() {
+  if (S.branch) return S.branch;
+  const info = await gh('GET', RP(''));
+  S.branch = info.default_branch || 'main'; LS.set('branch', S.branch);
+  return S.branch;
+}
+async function headInfo() {
+  const br = await getBranch();
+  const ref = await gh('GET', RP('/git/ref/heads/' + encPath(br)));
+  const commit = await gh('GET', RP('/git/commits/' + ref.object.sha));
+  return { br, head: ref.object.sha, tree: commit.tree.sha };
+}
+async function commitTree(entries, message, attempt = 0) {
+  const { br, head, tree } = await headInfo();
+  const t = await gh('POST', RP('/git/trees'), { body: { base_tree: tree,
+    tree: entries.map(e => ({ path: e.path, mode: '100644', type: 'blob', sha: e.sha })) } });
+  const c = await gh('POST', RP('/git/commits'), { body: { message, tree: t.sha, parents: [head] } });
+  try { await gh('PATCH', RP('/git/refs/heads/' + encPath(br)), { body: { sha: c.sha } }); }
+  catch (e) {   // 그 사이 다른 저장(읽기 기록 등)이 끼어든 경우 다시 시도
+    if (attempt < 3 && e instanceof ApiErr && (e.status === 422 || e.status === 409)) return commitTree(entries, message, attempt + 1);
+    throw e;
+  }
+}
+function fileToB64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(String(r.result).split(',')[1] || '');
+    r.onerror = () => rej(r.error);
+    r.readAsDataURL(file);
+  });
+}
+async function uploadBlob(file) {
+  const content = await fileToB64(file);
+  return (await gh('POST', RP('/git/blobs'), { body: { content, encoding: 'base64' } })).sha;
+}
+async function treeUnder(prefix) {
+  const { tree } = await headInfo();
+  const t = await gh('GET', RP('/git/trees/' + tree + '?recursive=1'));
+  return (t.tree || []).filter(x => x.type === 'blob' && x.path.startsWith(prefix + '/'));
+}
 
 /* ---------- 기기 보관(IndexedDB) ---------- */
 const IDB = (() => {
@@ -349,7 +536,6 @@ const IDB = (() => {
     clear: () => run('readwrite', st => st.clear())
   };
 })();
-// 목록 표시용 요약(파일 내용은 IndexedDB에만 저장)
 S.cache = LS.get('cache', {});
 const cacheKey = path => S.repo + ':' + path;
 async function keepBook(path, name, sha, buf) {
@@ -358,13 +544,12 @@ async function keepBook(path, name, sha, buf) {
     S.cache[cacheKey(path)] = { path, name, sha, size: buf.byteLength, at: Date.now() };
     LS.set('cache', S.cache);
     if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
-  } catch {}   // 저장공간 부족 등: 보관만 건너뜀
+  } catch {}
 }
 async function dropBook(key) {
-  try { await IDB.del(key); } catch {}
+  try { await IDB.del(key); await IDB.del(key + '|text'); } catch {}
   delete S.cache[key]; LS.set('cache', S.cache);
 }
-/* 기기 보관본이 최신이면 그대로, 아니면 새로 받기. 오프라인이면 보관본 사용 */
 async function loadBook(path, name, knownSha) {
   const key = cacheKey(path);
   let kept = null;
@@ -373,45 +558,42 @@ async function loadBook(path, name, knownSha) {
   if (!sha) {
     try { sha = await fileSha(path); }
     catch (e) {
-      if (kept && e instanceof ApiErr && e.kind === 'network') return { buf: kept.buf, from: 'offline' };
+      if (kept && e instanceof ApiErr && e.kind === 'network') return { buf: kept.buf, sha: kept.sha, from: 'offline' };
       throw e;
     }
   }
-  if (kept && kept.sha === sha) return { buf: kept.buf, from: 'kept' };
+  if (kept && kept.sha === sha) return { buf: kept.buf, sha, from: 'kept' };
   let buf;
   try { buf = await downloadBuf(path); }
   catch (e) {
-    if (kept && e instanceof ApiErr && e.kind === 'network') return { buf: kept.buf, from: 'offline' };
+    if (kept && e instanceof ApiErr && e.kind === 'network') return { buf: kept.buf, sha: kept.sha, from: 'offline' };
     throw e;
   }
   await keepBook(path, name, sha, buf);
-  return { buf, from: kept ? 'updated' : 'download' };
+  return { buf, sha, from: kept ? 'updated' : 'download' };
 }
 
 const b64ToText = b => { const bin = atob(b.replace(/\s/g, '')); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new TextDecoder().decode(u); };
 const textToB64 = t => { const u = new TextEncoder().encode(t); let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); };
-
 function parseRepo(v) {
   v = v.trim().replace(/^https?:\/\/github\.com\//i, '').replace(/\.git$/i, '').replace(/\/+$/, '');
   const m = v.match(/^([A-Za-z0-9-]+)\/([A-Za-z0-9._-]+)$/);
   return m ? m[1] + '/' + m[2] : '';
 }
-
 function errMsg(e) {
   if (!(e instanceof ApiErr)) return '오류가 발생했습니다: ' + (e && e.message || e);
   if (e.kind === 'network') return navigator.onLine === false ? '인터넷에 연결되어 있지 않습니다.' : 'GitHub에 접속하지 못했습니다. 잠시 후 다시 시도하세요.';
   if (e.status === 401) return '토큰이 맞지 않거나 만료되었습니다. 새 토큰을 입력하세요.';
   if (e.message === 'ratelimit') return 'GitHub 사용 한도를 넘었습니다. 1시간 이내에 풀립니다.';
-  if (e.status === 403) return '토큰에 이 저장소 권한이 없습니다. 토큰의 Contents 권한을 확인하세요.';
-  if (e.status === 404) return '저장소나 파일을 찾을 수 없습니다. 저장소 이름과 토큰의 저장소 선택을 확인하세요.';
+  if (e.status === 403) return '토큰에 이 저장소 쓰기 권한이 없습니다. 토큰의 Contents 권한(Read and write)을 확인하세요.';
+  if (e.status === 404) return '저장소나 파일을 찾을 수 없습니다.';
+  if (e.status === 413 || e.status === 422 && /large|size/i.test(e.message)) return '파일이 너무 큽니다.';
   return 'GitHub 오류 (' + e.status + ')' + (e.message ? ': ' + e.message : '');
 }
 function onAuthFail(e) {
   if (e instanceof ApiErr && e.status === 401) { showSetup(errMsg(e)); return true; }
   return false;
 }
-
-/* ---------- 텍스트 ---------- */
 function decodeText(buf) {
   const b = new Uint8Array(buf);
   if (b[0] === 0xFF && b[1] === 0xFE) return new TextDecoder('utf-16le').decode(b.subarray(2));
@@ -420,12 +602,18 @@ function decodeText(buf) {
   catch { return new TextDecoder('euc-kr').decode(b); }
 }
 
-/* ---------- 읽기 기록 동기화 ---------- */
+/* ---------- 읽기 기록·메모 동기화 ---------- */
 function mergeProg(a, b) {
-  const out = { v: 1, files: Object.assign({}, (a && a.files) || {}), settings: (a && a.settings) || null };
+  const out = { v: 1, files: Object.assign({}, (a && a.files) || {}), settings: (a && a.settings) || null, notes: {} };
   for (const [id, r] of Object.entries((b && b.files) || {}))
     if (!out.files[id] || (r.t || 0) > (out.files[id].t || 0)) out.files[id] = r;
   if (b && b.settings && (!out.settings || (b.settings.t || 0) > (out.settings.t || 0))) out.settings = b.settings;
+  const na = (a && a.notes) || {}, nb = (b && b.notes) || {};
+  for (const id of new Set([...Object.keys(na), ...Object.keys(nb)])) {
+    const x = Object.assign({}, na[id] || {});
+    for (const [k, v] of Object.entries(nb[id] || {})) if (!x[k] || (v.t || 0) > (x[k].t || 0)) x[k] = v;
+    out.notes[id] = x;
+  }
   return out;
 }
 async function pullProg() {
@@ -435,14 +623,15 @@ async function pullProg() {
     const remote = JSON.parse(b64ToText(f.content || ''));
     S.prog = mergeProg(S.prog, remote); LS.set('prog', S.prog);
     applyRemoteSettings();
+    if (S.book && !S.book.loading) { rebuildMarks(); refreshVisible(); }
   } catch (e) {
     if (!(e instanceof ApiErr && e.status === 404)) throw e;
-    S.progSha = null;   // 아직 기록 파일 없음
+    S.progSha = null;
   }
   S.pulled = true; S.lastPull = Date.now();
   setSync('ok');
 }
-let pushing = null;
+let pushing = null, pushSoonTimer = 0;
 function pushProg() {
   if (!S.dirty || !S.token) return Promise.resolve();
   if (pushing) return pushing;
@@ -453,13 +642,12 @@ function pushProg() {
       setSync('saving');
       for (let attempt = 0; ; attempt++) {
         try {
-          const body = { message: '읽기 기록 저장', content: textToB64(JSON.stringify(S.prog, null, 1)) };
+          const body = { message: '읽기 기록 저장', content: textToB64(JSON.stringify(S.prog)) };
           if (S.progSha) body.sha = S.progSha;
           const r = await gh('PUT', contents(PROG_PATH), { body });
           S.progSha = r.content.sha;
           break;
         } catch (e) {
-          // 다른 기기가 먼저 저장한 경우: 받아서 합친 뒤 다시 저장
           if (attempt < 2 && e instanceof ApiErr && (e.status === 409 || e.status === 422)) { await pullProg(); continue; }
           throw e;
         }
@@ -474,23 +662,20 @@ function pushProg() {
   return pushing;
 }
 function markDirty() { S.dirty = true; LS.set('dirty', true); }
-
+function pushSoon() { clearTimeout(pushSoonTimer); pushSoonTimer = setTimeout(pushProg, 4000); }
 let syncState = { s: '', at: 0, msg: '' };
 function setSync(s, msg) {
   syncState = { s, at: Date.now(), msg: msg || '' };
   const time = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-  const txt = s === 'ok' ? '읽기 기록 동기화됨 ' + time
-    : s === 'saving' ? '읽기 기록 저장 중'
-    : s === 'fail' ? '읽기 기록 저장 실패 · ' + msg : '';
-  $('#readSync').textContent = txt;
-  $('#libSync').textContent = txt;
+  const txt = s === 'ok' ? '읽기 기록 동기화됨 ' + time : s === 'saving' ? '읽기 기록 저장 중' : s === 'fail' ? '읽기 기록 저장 실패 · ' + msg : '';
+  $('#readSync').textContent = txt; $('#libSync').textContent = txt;
 }
 
 /* ---------- 화면 전환 ---------- */
 function show(id) {
   for (const s of ['setup', 'library', 'reader']) $('#' + s).hidden = s !== id;
   document.querySelector('meta[name=theme-color]').content =
-    id === 'reader' ? S.set.bg : getComputedStyle(document.documentElement).getPropertyValue('--paper').trim();
+    id === 'reader' ? colors().bg : getComputedStyle(document.documentElement).getPropertyValue('--paper').trim();
 }
 function showSetup(msg) {
   closeSheets(); S.book = null;
@@ -499,8 +684,6 @@ function showSetup(msg) {
   $('#setupMsg').className = 'msg' + (msg ? ' err' : '');
   show('setup');
 }
-
-/* ---------- 연결 ---------- */
 async function doLogin() {
   const repo = parseRepo($('#repoInput').value), tok = $('#tokenInput').value.trim();
   const msg = $('#setupMsg'); msg.className = 'msg err';
@@ -511,7 +694,8 @@ async function doLogin() {
   try {
     const info = await gh('GET', '/repos/' + repo);
     if (info.permissions && info.permissions.push === false) throw new ApiErr('http', 403, '');
-    if (prev[0] && prev[0] !== repo) { S.prog = { v: 1, files: {} }; LS.del('prog'); S.nav = [{ id: '', name: '소설' }]; LS.set('nav', S.nav); }
+    if (prev[0] && prev[0] !== repo) { S.prog = { v: 1, files: {}, notes: {} }; LS.del('prog'); S.nav = [{ id: '', name: '저장소' }]; LS.set('nav', S.nav); }
+    S.branch = info.default_branch || 'main'; LS.set('branch', S.branch);
     LS.set('repo', repo); LS.set('token', tok);
     S.pulled = false; S.progSha = null;
     msg.textContent = '';
@@ -538,9 +722,11 @@ function fmtAgo(t) {
   if (h < 24) return h + '시간 전';
   return new Date(t).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
 }
+const curFolder = () => S.nav[S.nav.length - 1].id;
+let listed = { folders: [], files: [] };
 
 function renderRecent() {
-  const items = Object.entries(S.prog.files || {}).sort((a, b) => (b[1].t || 0) - (a[1].t || 0)).slice(0, 6);
+  const items = Object.entries(S.prog.files || {}).filter(([, r]) => !r.del).sort((a, b) => (b[1].t || 0) - (a[1].t || 0)).slice(0, 6);
   $('#recentWrap').hidden = !items.length;
   $('#recentList').innerHTML = items.map(([id, r]) =>
     `<button class="row" data-open="${esc(id)}" data-name="${esc(r.name)}">${ICON_BOOK}
@@ -549,36 +735,36 @@ function renderRecent() {
       <span class="bar"><i style="width:${Math.min(100, r.pct || 0)}%"></i></span></span></button>`).join('');
 }
 function renderCrumbs() {
-  $('#crumbs').innerHTML = S.nav.map((n, i) =>
-    (i ? '<span>/</span>' : '') + `<button data-crumb="${i}">${esc(n.name)}</button>`).join('');
+  $('#crumbs').innerHTML = S.nav.map((n, i) => (i ? '<span>/</span>' : '') + `<button data-crumb="${i}">${esc(n.name)}</button>`).join('');
 }
 let listSeq = 0;
 async function loadFolder() {
   renderCrumbs();
-  const seq = ++listSeq, box = $('#folderList'), cur = S.nav[S.nav.length - 1];
+  const seq = ++listSeq, box = $('#folderList'), cur = curFolder();
   box.innerHTML = '<p class="empty">불러오는 중…</p>';
   try {
-    const d = await listDir(cur.id);
+    const d = await listDir(cur);
     if (seq !== listSeq) return;
-    const join = n => (cur.id ? cur.id + '/' : '') + n;
-    const folders = d.folders.map(f => ({ resourceId: join(f.name), name: f.name }));
-    const books = d.files.map(f => ({ resourceId: join(f.name), name: f.name, size: f.size, sha: f.sha }));
-    if (!folders.length && !books.length) { box.innerHTML = '<p class="empty">이 폴더에 txt 파일이나 하위 폴더가 없습니다. GitHub 저장소에 txt 파일을 올리세요.</p>'; return; }
-    box.innerHTML = folders.map(f =>
-      `<button class="row" data-folder="${esc(f.resourceId)}" data-name="${esc(f.name)}">${ICON_FOLDER}
-        <span class="main"><span class="name">${esc(f.name)}</span></span></button>`).join('') +
-      books.map(f => {
-        const r = S.prog.files[f.resourceId];
-        const c = S.cache[cacheKey(f.resourceId)];
+    listed = d;
+    const join = n => (cur ? cur + '/' : '') + n;
+    if (!d.folders.length && !d.files.length) { box.innerHTML = '<p class="empty">이 폴더에 책이 없습니다. "파일 올리기"로 TXT·EPUB·PDF를 추가하세요.</p>'; return; }
+    box.innerHTML = d.folders.map(f =>
+      `<div class="item"><button class="row" data-folder="${esc(join(f.name))}" data-name="${esc(f.name)}">${ICON_FOLDER}
+        <span class="main"><span class="name">${esc(f.name)}</span></span></button>
+        <button class="more" data-more="${esc(join(f.name))}" data-kind="folder" data-name="${esc(f.name)}" aria-label="${esc(f.name)} 관리">⋯</button></div>`).join('') +
+      d.files.map(f => {
+        const id = join(f.name), r = S.prog.files[id], c = S.cache[cacheKey(id)];
         const tag = !c ? '' : c.sha === f.sha ? ' · <span class="kept">기기에 보관됨</span>' : ' · 새 버전 있음';
-        return `<button class="row" data-open="${esc(f.resourceId)}" data-name="${esc(f.name)}" data-sha="${esc(f.sha || '')}">${ICON_BOOK}
-          <span class="main"><span class="name">${esc(f.name)}</span><span class="sub">${fmtSize(f.size || 0)}${tag}</span></span>
-          ${r ? `<span class="pct">${(r.pct || 0).toFixed(1)}%</span>` : ''}</button>`;
+        return `<div class="item"><button class="row" data-open="${esc(id)}" data-name="${esc(f.name)}" data-sha="${esc(f.sha || '')}">${ICON_BOOK}
+          <span class="main"><span class="name">${esc(f.name)}</span><span class="sub"><span class="kind">${kindOf(f.name).toUpperCase()}</span> · ${fmtSize(f.size || 0)}${tag}</span></span>
+          ${r && !r.del ? `<span class="pct">${(r.pct || 0).toFixed(1)}%</span>` : ''}</button>
+          <button class="more" data-more="${esc(id)}" data-kind="file" data-name="${esc(f.name)}" aria-label="${esc(f.name)} 관리">⋯</button></div>`;
       }).join('');
   } catch (e) {
     if (seq !== listSeq) return;
     if (onAuthFail(e)) return;
     if (e.status === 404 && S.nav.length > 1) { S.nav = [S.nav[0]]; LS.set('nav', S.nav); return loadFolder(); }
+    if (e.status === 404) { listed = { folders: [], files: [] }; box.innerHTML = '<p class="empty">저장소가 비어 있습니다. "파일 올리기"로 책을 추가하세요.</p>'; return; }
     box.innerHTML = `<p class="empty">${esc(errMsg(e))}</p><button class="btn ghost" data-retry>다시 시도</button>`;
   }
 }
@@ -593,76 +779,289 @@ $('#library').addEventListener('click', e => {
   if (b.dataset.folder) { S.nav.push({ id: b.dataset.folder, name: b.dataset.name }); LS.set('nav', S.nav); loadFolder(); }
   else if (b.dataset.crumb != null) { S.nav = S.nav.slice(0, +b.dataset.crumb + 1); LS.set('nav', S.nav); loadFolder(); }
   else if (b.dataset.open) openBook(b.dataset.open, b.dataset.name, b.dataset.sha);
+  else if (b.dataset.more) openItem(b.dataset.more, b.dataset.kind, b.dataset.name);
   else if (b.hasAttribute('data-retry')) loadFolder();
 });
 $('#refreshBtn').onclick = () => { loadFolder(); pullProg().then(renderRecent).catch(e => setSync('fail', errMsg(e))); };
 
-/* ---------- 리더: 그리기 ---------- */
-const page = $('#page'), textEl = $('#text');
-function chunkEl(k) {
-  const d = document.createElement('div'); d.className = 'chunk';
-  const C = chunkSize(), lines = S.book.lines, end = Math.min((k + 1) * C, lines.length);
-  const f = document.createDocumentFragment();
-  for (let i = k * C; i < end; i++) {
-    const p = document.createElement('p'); p.dataset.i = i;
-    const t = lines[i];
-    if (t.trim() === '') p.className = 'blank'; else p.textContent = t;
-    f.appendChild(p);
+/* ---------- 이름·삭제 후 기록 정리(삭제 표시로 다른 기기에도 반영) ---------- */
+function migrateLocal(from, to, isFolder) {
+  const hit = k => isFolder ? k.startsWith(from + '/') : k === from;
+  const map = k => isFolder ? to + k.slice(from.length) : to;
+  const now = Date.now();
+  for (const [k, v] of Object.entries(S.prog.files)) {
+    if (!hit(k) || v.del) continue;
+    S.prog.files[k] = { del: true, name: v.name, t: now };
+    if (to != null) S.prog.files[map(k)] = Object.assign({}, v, { name: map(k).split('/').pop(), t: now });
   }
-  d.appendChild(f); return d;
+  for (const [k, items] of Object.entries(S.prog.notes)) {
+    if (!hit(k)) continue;
+    const moved = {};
+    for (const [nid, it] of Object.entries(items)) {
+      if (to != null && !it.del) moved[nid] = Object.assign({}, it, { t: now });
+      items[nid] = Object.assign({}, it, { del: true, t: now });
+    }
+    if (to != null) S.prog.notes[map(k)] = Object.assign(S.prog.notes[map(k)] || {}, moved);
+  }
+  for (const key of Object.keys(S.cache)) {
+    const p = key.slice(S.repo.length + 1);
+    if (key.startsWith(S.repo + ':') && hit(p)) dropBook(key);
+  }
+  LS.set('prog', S.prog); markDirty(); pushSoon();
 }
+const validName = n => n && !n.startsWith('.') && !/[\\/:*?"<>|]/.test(n);
+
+/* ---------- 파일·폴더 관리 ---------- */
+let itemCtx = null;
+function openItem(path, kind, name) {
+  itemCtx = { path, kind, name };
+  $('#itemName').textContent = name;
+  $('#itemInfo').textContent = kind === 'folder' ? '폴더 안의 모든 책도 함께 바뀌거나 삭제됩니다.' : '';
+  openSheet('item');
+}
+$('#itemRename').onclick = async () => {
+  const { path, kind, name } = itemCtx;
+  let nn = prompt('새 이름', name); if (nn == null) return;
+  nn = nn.trim();
+  if (kind === 'file' && !BOOK_RE.test(nn)) nn += '.' + kindOf(name);
+  if (!validName(nn)) { toast('사용할 수 없는 이름입니다.'); return; }
+  if (nn === name) return;
+  const dir = path.includes('/') ? path.slice(0, path.lastIndexOf('/') + 1) : '';
+  const to = dir + nn;
+  if (listed.files.some(f => f.name === nn) || listed.folders.some(f => f.name === nn)) { toast('같은 이름이 이미 있습니다.'); return; }
+  closeSheets(); toast('이름을 바꾸는 중…');
+  try {
+    if (kind === 'file') {
+      const sha = await fileSha(path);
+      await commitTree([{ path: to, sha }, { path, sha: null }], '이름 바꾸기: ' + name + ' → ' + nn);
+    } else {
+      const files = await treeUnder(path);
+      await commitTree(files.flatMap(f => [{ path: to + f.path.slice(path.length), sha: f.sha }, { path: f.path, sha: null }]), '폴더 이름 바꾸기: ' + name + ' → ' + nn);
+    }
+    migrateLocal(path, to, kind === 'folder');
+    toast('이름을 바꿨습니다.'); loadFolder(); renderRecent();
+  } catch (e) { if (!onAuthFail(e)) toast(errMsg(e)); }
+};
+$('#itemDelete').onclick = async () => {
+  const { path, kind, name } = itemCtx;
+  if (!confirm(`"${name}"${kind === 'folder' ? ' 폴더와 안의 모든 파일' : ''}을 저장소에서 삭제합니다. 되돌릴 수 없습니다.`)) return;
+  closeSheets(); toast('삭제하는 중…');
+  try {
+    if (kind === 'file') await commitTree([{ path, sha: null }], '삭제: ' + name);
+    else {
+      const files = await treeUnder(path);
+      if (files.length) await commitTree(files.map(f => ({ path: f.path, sha: null })), '폴더 삭제: ' + name);
+    }
+    migrateLocal(path, null, kind === 'folder');
+    toast('삭제했습니다.'); loadFolder(); renderRecent();
+  } catch (e) { if (!onAuthFail(e)) toast(errMsg(e)); }
+};
+$('#mkdirBtn').onclick = async () => {
+  let n = prompt('새 폴더 이름'); if (n == null) return;
+  n = n.trim();
+  if (!validName(n)) { toast('사용할 수 없는 이름입니다.'); return; }
+  if (listed.folders.some(f => f.name === n)) { toast('같은 이름의 폴더가 있습니다.'); return; }
+  const cur = curFolder(), path = (cur ? cur + '/' : '') + n;
+  toast('폴더를 만드는 중…');
+  try {
+    const sha = (await gh('POST', RP('/git/blobs'), { body: { content: '', encoding: 'utf-8' } })).sha;
+    await commitTree([{ path: path + '/.keep', sha }], '폴더 만들기: ' + n);
+    toast('폴더를 만들었습니다.'); loadFolder();
+  } catch (e) { if (!onAuthFail(e)) toast(errMsg(e)); }
+};
+
+/* ---------- 업로드 ---------- */
+let upFiles = [];
+function openUpload(files) {
+  if (!S.token) return;
+  if (files && files.length) addUpFiles(files);
+  const cur = curFolder();
+  $('#upInfo').textContent = '저장 위치: ' + S.nav.map(n => n.name).join(' / ') + (cur ? '' : ' (맨 위)');
+  renderUp();
+  openSheet('up');
+}
+function addUpFiles(list) {
+  for (const f of list) if (!upFiles.some(x => x.file.name === f.name && x.file.size === f.size))
+    upFiles.push({ file: f, st: !BOOK_RE.test(f.name) ? 'skip' : f.size > MAX_UP ? 'big' : 'wait', msg: '' });
+  renderUp();
+}
+function renderUp() {
+  const label = { wait: '대기', skip: '지원 안 함', big: '100MB 초과', up: '올리는 중…', ok: '완료', err: '오류' };
+  $('#upList').innerHTML = upFiles.map(x =>
+    `<div class="up-row"><span class="n">${esc(x.file.name)}</span><span class="s">${fmtSize(x.file.size)}</span>
+      <span class="st ${x.st === 'ok' ? 'ok' : ['skip', 'big', 'err'].includes(x.st) ? 'err' : ''}">${label[x.st]}${x.msg ? ': ' + esc(x.msg) : ''}</span></div>`).join('');
+  $('#upGo').disabled = !upFiles.some(x => x.st === 'wait' || x.st === 'err');
+}
+$('#uploadBtn').onclick = () => openUpload();
+$('#fileInput').onchange = e => { addUpFiles(e.target.files); e.target.value = ''; };
+const dz = $('#dropZone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('over'); addUpFiles(e.dataTransfer.files); });
+$('#upGo').onclick = async () => {
+  const todo = upFiles.filter(x => x.st === 'wait' || x.st === 'err');
+  if (!todo.length) return;
+  const exist = todo.filter(x => listed.files.some(f => f.name === x.file.name)).map(x => x.file.name);
+  if (exist.length && !confirm('같은 이름의 파일을 덮어씁니다:\n' + exist.join('\n'))) return;
+  const btn = $('#upGo'); btn.disabled = true;
+  const cur = curFolder(), entries = [];
+  for (const x of todo) {
+    x.st = 'up'; x.msg = ''; renderUp(); btn.disabled = true;
+    try { entries.push({ path: (cur ? cur + '/' : '') + x.file.name, sha: await uploadBlob(x.file), x }); }
+    catch (e) { x.st = 'err'; x.msg = errMsg(e); renderUp(); if (onAuthFail(e)) return; }
+  }
+  if (entries.length) {
+    try {
+      await commitTree(entries.map(({ path, sha }) => ({ path, sha })), '파일 올리기 ' + entries.length + '개');
+      for (const { x } of entries) x.st = 'ok';
+      toast(entries.length + '개를 올렸습니다.');
+      loadFolder();
+    } catch (e) {
+      for (const { x } of entries) { x.st = 'err'; x.msg = errMsg(e); }
+      onAuthFail(e);
+    }
+  }
+  renderUp();
+  if (upFiles.filter(x => x.st !== 'skip' && x.st !== 'big').every(x => x.st === 'ok')) { setTimeout(() => { if (!$('#upSheet').hidden) closeSheets(); upFiles = []; }, 900); }
+  else upFiles = upFiles.filter(x => x.st !== 'ok');
+  renderUp();
+};
+/* PC: 서재 화면 아무 곳에 끌어다 놓기 */
+let dragDepth = 0;
+const hasFiles = e => e.dataTransfer && [...e.dataTransfer.types].includes('Files');
+window.addEventListener('dragenter', e => { if (!hasFiles(e)) return; e.preventDefault(); dragDepth++; if (!$('#library').hidden && $('#upSheet').hidden) $('#dragOver').hidden = false; });
+window.addEventListener('dragleave', e => { if (!hasFiles(e)) return; if (--dragDepth <= 0) { dragDepth = 0; $('#dragOver').hidden = true; } });
+window.addEventListener('dragover', e => { if (hasFiles(e)) e.preventDefault(); });
+window.addEventListener('drop', e => {
+  if (!hasFiles(e)) return;
+  e.preventDefault(); dragDepth = 0; $('#dragOver').hidden = true;
+  if (!$('#library').hidden && !e.target.closest('#dropZone')) openUpload(e.dataTransfer.files);
+});
+/* 안드로이드 "공유하기"로 받은 파일 */
+async function takeShared() {
+  try {
+    const c = await caches.open('viewer-share');
+    const keys = await c.keys(), files = [];
+    for (const k of keys) {
+      const r = await c.match(k);
+      if (r) files.push(new File([await r.blob()], decodeURIComponent(r.headers.get('x-name') || 'file'), { type: r.headers.get('content-type') || '' }));
+      await c.delete(k);
+    }
+    return files;
+  } catch { return []; }
+}
+
+/* ---------- 리더: 블록 그리기 ---------- */
+const page = $('#page'), textEl = $('#text'), pdfView = $('#pdfView');
+const isFlow = () => S.book && S.book.view !== 'pdfpage';
 const paged = () => S.set.mode !== 'scroll';
 const chunkSize = () => paged() ? CHP : CH;
+const units = () => S.book.lines.length;
+const blockText = i => { const t = S.book.lines[i]; return typeof t === 'string' ? t : (t && t.text) || ''; };
+const curPm = () => S.book.kind === 'pdf' ? (isFlow() ? 'text' : 'page') : undefined;
+function pageOfBlock(i) {
+  const ps = S.book.pageStart; if (!ps) return 0;
+  let lo = 0, hi = ps.length - 1;
+  while (lo < hi) { const m = (lo + hi + 1) >> 1; if (ps[m] <= i) lo = m; else hi = m - 1; }
+  return lo;
+}
+const curPg = i => S.book.kind !== 'pdf' ? undefined : isFlow() ? pageOfBlock(i) : i;
 
-/* 페이지 모드: 다단(column)으로 화면 너비마다 한 쪽씩 배치. 줄은 쪽 경계에서 잘리지 않음 */
+/* 하이라이트·검색 표시 */
+function rebuildMarks() {
+  const idx = {}, pm = curPm();
+  if (S.book) for (const it of notesOf(S.book.id)) {
+    if (it.type !== 'hl' || it.pm !== pm) continue;
+    for (let j = it.s.i; j <= it.e.i; j++) (idx[j] = idx[j] || []).push(it);
+  }
+  if (S.book) S.book.hlIdx = idx;
+}
+function segsFor(i, len) {
+  const out = [];
+  for (const it of (S.book.hlIdx && S.book.hlIdx[i]) || []) {
+    const s = i === it.s.i ? it.s.o : 0, e = i === it.e.i ? it.e.o : len;
+    if (e > s) out.push({ s, e, cls: 'hl hl-' + it.c + (it.memo ? ' memo' : ''), id: it.id });
+  }
+  const fm = S.findMark;
+  if (fm && fm.i === i) out.push({ s: fm.o, e: Math.min(len, fm.o + fm.len), find: true });
+  return out;
+}
+function fillBlock(p, i) {
+  const t = S.book.lines[i];
+  p.textContent = '';
+  if (t && typeof t === 'object' && t.img) {
+    p.className = 'img';
+    const im = document.createElement('img'); im.src = t.img; im.alt = ''; p.appendChild(im); return;
+  }
+  const text = blockText(i);
+  p.className = t && t.h ? 'h' : text.trim() ? '' : 'blank';
+  if (!text.trim()) return;
+  const segs = segsFor(i, text.length);
+  if (!segs.length) { p.textContent = text; return; }
+  const cuts = new Set([0, text.length]);
+  for (const g of segs) { cuts.add(g.s); cuts.add(g.e); }
+  const pts = [...cuts].sort((a, b) => a - b);
+  for (let k = 0; k < pts.length - 1; k++) {
+    const a = pts[k], b = pts[k + 1]; if (a === b) continue;
+    const piece = text.slice(a, b), cover = segs.filter(g => g.s <= a && g.e >= b), top = cover[cover.length - 1];
+    if (!top) { p.appendChild(document.createTextNode(piece)); continue; }
+    const sp = document.createElement(top.find ? 'mark' : 'span');
+    sp.className = top.find ? 'find' : top.cls;
+    if (top.id) sp.dataset.hl = top.id;
+    sp.textContent = piece; p.appendChild(sp);
+  }
+}
+function refreshVisible() {
+  if (!S.book || !isFlow()) return;
+  for (const p of textEl.querySelectorAll('p[data-i]')) fillBlock(p, +p.dataset.i);
+}
+function chunkEl(k) {
+  const d = document.createElement('div'); d.className = 'chunk';
+  const C = chunkSize(), end = Math.min((k + 1) * C, units());
+  for (let i = k * C; i < end; i++) { const p = document.createElement('p'); p.dataset.i = i; fillBlock(p, i); d.appendChild(p); }
+  return d;
+}
+
+/* 페이지 모드: 다단(column) 배치. 2쪽 보기면 화면당 2단 */
 let PG = { W: 1, pm: 0 };
+const spreadOn = () => S.set.spread && page.clientWidth >= 900 && page.clientWidth > page.clientHeight;
 function layoutPaged() {
   const t = textEl.style;
-  if (!paged()) {
+  if (!isFlow() || !paged()) {
     for (const k of ['width', 'height', 'columnWidth', 'columnGap', 'paddingLeft', 'paddingRight']) t[k] = '';
     page.scrollLeft = 0; return;
   }
-  const W = page.clientWidth, H = page.clientHeight;
-  const pm = Math.max(S.set.margin, Math.floor((W - S.set.size * 40) / 2));
-  PG = { W, pm };
-  t.width = W + 'px'; t.height = H + 'px';
-  t.paddingLeft = t.paddingRight = pm + 'px';
-  t.columnWidth = (W - 2 * pm) + 'px'; t.columnGap = (2 * pm) + 'px';
+  let W = page.clientWidth; const H = page.clientHeight;
+  if (spreadOn()) {
+    W -= W % 2;
+    const colW = Math.max(200, Math.min(W / 2 - 2 * S.set.margin, Math.round(S.set.size * 34)));
+    const g = W / 2 - colW;
+    PG = { W, pm: g / 2, two: true };
+    t.width = W + 'px'; t.paddingLeft = t.paddingRight = (g / 2) + 'px';
+    t.columnWidth = colW + 'px'; t.columnGap = g + 'px';
+  } else {
+    const pm = Math.max(S.set.margin, Math.floor((W - S.set.size * 40) / 2));
+    PG = { W, pm, two: false };
+    t.width = W + 'px'; t.paddingLeft = t.paddingRight = pm + 'px';
+    t.columnWidth = (W - 2 * pm) + 'px'; t.columnGap = (2 * pm) + 'px';
+  }
+  t.height = H + 'px';
+  const cs = getComputedStyle(textEl);
+  textEl.style.setProperty('--colh', Math.max(120, H - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 8) + 'px');
 }
 const pageCount = () => Math.max(1, Math.ceil((page.scrollWidth - 2) / PG.W));
 const curPage = () => Math.round(page.scrollLeft / PG.W);
 const setPage = i => { page.scrollLeft = i * PG.W; };
-function renderPagedChunk(k) {
-  page.scrollLeft = 0;
-  textEl.textContent = '';
-  S.first = S.last = k;
-  textEl.appendChild(chunkEl(k));
-}
-function turn(d) {
-  const nk = Math.ceil(S.book.lines.length / CHP);
-  let idx = curPage() + d;
-  if (idx >= pageCount()) {
-    if (S.first >= nk - 1) { toast('마지막 페이지입니다.'); return; }
-    renderPagedChunk(S.first + 1); idx = 0;
-  } else if (idx < 0) {
-    if (S.first <= 0) return;
-    renderPagedChunk(S.first - 1); idx = pageCount() - 1;
-  }
-  setPage(idx);
-  S.book.moved = true;
-  const p = getPos(); if (p) updatePct(pctOf(p.i));
-  clearTimeout(recTimer); recTimer = setTimeout(recordPos, 700);
-}
-
+function renderPagedChunk(k) { page.scrollLeft = 0; textEl.textContent = ''; S.first = S.last = k; textEl.appendChild(chunkEl(k)); }
 function renderAround(k) {
-  const n = Math.ceil(S.book.lines.length / CH);
+  const n = Math.ceil(units() / CH);
   textEl.textContent = '';
   S.first = Math.max(0, k - 1); S.last = Math.min(n - 1, k + 1);
   for (let j = S.first; j <= S.last; j++) textEl.appendChild(chunkEl(j));
 }
 function extendWindow() {
-  if (!S.book || paged()) return;
-  const n = Math.ceil(S.book.lines.length / CH), vh = page.clientHeight;
+  if (!S.book || !isFlow() || paged()) return;
+  const n = Math.ceil(units() / CH), vh = page.clientHeight;
   if (page.scrollTop + vh > page.scrollHeight - 1.5 * vh && S.last < n - 1) {
     S.last++; textEl.appendChild(chunkEl(S.last));
     if (S.last - S.first > 4) { const c = textEl.firstElementChild, h = c.offsetHeight; c.remove(); S.first++; page.scrollTop -= h; }
@@ -674,13 +1073,15 @@ function extendWindow() {
     if (S.last - S.first > 4) { textEl.lastElementChild.remove(); S.last--; }
   }
 }
+const pAt = (x, y) => document.elementsFromPoint(x, y).find(el => el.tagName === 'P' && el.dataset.i != null);
 function getPos() {
   if (!S.book) return null;
+  if (!isFlow()) return { i: S.pdfCur, f: 0 };
+  const r = page.getBoundingClientRect();
   if (paged()) {
-    const r = page.getBoundingClientRect(), x = r.left + PG.pm + 3;
-    const y0 = r.top + parseFloat(getComputedStyle(textEl).paddingTop) + 2;
+    const x = r.left + PG.pm + 3, y0 = r.top + parseFloat(getComputedStyle(textEl).paddingTop) + 2;
     for (let y = y0; y < r.bottom - 8; y += 6) {
-      const p = document.elementsFromPoint(x, y).find(el => el.tagName === 'P' && el.dataset.i != null);
+      const p = pAt(x, y);
       if (p) {
         const rects = [...p.getClientRects()].filter(q => q.height > 0);
         const total = rects.reduce((a, q) => a + q.height, 0);
@@ -688,25 +1089,29 @@ function getPos() {
         return { i: +p.dataset.i, f: total ? before / total : 0 };
       }
     }
-    const first = textEl.querySelector('p[data-i]');
-    return first ? { i: +first.dataset.i, f: 0 } : { i: 0, f: 0 };
-  }
-  const r = page.getBoundingClientRect(), x = r.left + r.width / 2;
-  for (let y = r.top + 2; y < r.top + Math.min(240, r.height); y += 6) {
-    const p = document.elementsFromPoint(x, y).find(el => el.tagName === 'P' && el.dataset.i != null);
-    if (p) {
-      const pr = p.getBoundingClientRect();
-      const f = pr.height ? Math.min(1, Math.max(0, (r.top - pr.top) / pr.height)) : 0;
-      return { i: +p.dataset.i, f };
+  } else {
+    const x = r.left + r.width / 2;
+    for (let y = r.top + 2; y < r.top + Math.min(240, r.height); y += 6) {
+      const p = pAt(x, y);
+      if (p) { const pr = p.getBoundingClientRect(); return { i: +p.dataset.i, f: pr.height ? Math.min(1, Math.max(0, (r.top - pr.top) / pr.height)) : 0 }; }
     }
   }
   const first = textEl.querySelector('p[data-i]');
   return first ? { i: +first.dataset.i, f: 0 } : { i: 0, f: 0 };
 }
+function lastVisible() {
+  if (!S.book) return 0;
+  if (!isFlow()) return Math.min(units() - 1, S.pdfCur + (spreadOn() ? 1 : 0));
+  const r = page.getBoundingClientRect();
+  const x = paged() ? (PG.two ? r.right - PG.pm - 3 : r.left + PG.pm + 3) : r.left + r.width / 2;
+  for (let y = r.bottom - 30; y > r.top; y -= 8) { const p = pAt(x, y); if (p) return +p.dataset.i; }
+  const a = getPos(); return a ? a.i : 0;
+}
 function goTo(i, f) {
-  const L = S.book.lines.length;
+  const L = units();
   i = Math.max(0, Math.min(L - 1, i | 0));
   S.ignoreScrollUntil = Date.now() + 500;
+  if (!isFlow()) { S.pdfCur = i; renderPdf(); updatePct(pctOf(i)); updateBm(); return; }
   layoutPaged();
   if (paged()) {
     renderPagedChunk(Math.floor(i / CHP));
@@ -718,50 +1123,330 @@ function goTo(i, f) {
       for (const q of rects) { target = q; acc += q.height; if (!total || acc / total > (f || 0) + 1e-6) break; }
       if (target) setPage(Math.max(0, Math.floor((target.left - page.getBoundingClientRect().left + 2) / PG.W)));
     }
-    updatePct(pctOf(i));
-    return;
+  } else {
+    renderAround(Math.floor(i / CH));
+    const p = textEl.querySelector('p[data-i="' + i + '"]');
+    page.scrollTop = 0;
+    if (p) page.scrollTop = p.getBoundingClientRect().top - page.getBoundingClientRect().top + (f || 0) * p.offsetHeight;
+    extendWindow();
   }
-  renderAround(Math.floor(i / CH));
-  const p = textEl.querySelector('p[data-i="' + i + '"]');
-  page.scrollTop = 0;
-  if (p) page.scrollTop = p.getBoundingClientRect().top - page.getBoundingClientRect().top + (f || 0) * p.offsetHeight;
-  extendWindow();
-  updatePct(pctOf(i));
+  updatePct(pctOf(i)); updateBm();
 }
-const pctOf = i => S.book.lines.length > 1 ? i / (S.book.lines.length - 1) * 100 : 100;
-function updatePct(p) {
-  $('#pct').textContent = p.toFixed(1) + '%';
-  if (!seeking) $('#seek').value = Math.round(p * 10);
+function turn(d) {
+  if (!isFlow()) {
+    const step = spreadOn() ? 2 : 1, n = units();
+    let nx = S.pdfCur + d * step;
+    if (nx > n - 1) { toast('마지막 페이지입니다.'); return; }
+    if (nx < 0) { if (S.pdfCur === 0) return; nx = 0; }
+    S.pdfCur = nx; renderPdf();
+  } else {
+    const nk = Math.ceil(units() / CHP);
+    let idx = curPage() + d;
+    if (idx >= pageCount()) {
+      if (S.first >= nk - 1) { toast('마지막 페이지입니다.'); return; }
+      renderPagedChunk(S.first + 1); idx = 0;
+    } else if (idx < 0) {
+      if (S.first <= 0) return;
+      renderPagedChunk(S.first - 1); idx = pageCount() - 1;
+    }
+    setPage(idx);
+  }
+  S.book.moved = true;
+  const p = getPos(); if (p) updatePct(pctOf(p.i));
+  updateBm();
+  clearTimeout(recTimer); recTimer = setTimeout(recordPos, 700);
+}
+const pctOf = i => units() > 1 ? i / (units() - 1) * 100 : 100;
+function updatePct(p) { $('#pct').textContent = p.toFixed(1) + '%'; if (!seeking) $('#seek').value = Math.round(p * 10); }
+
+/* ---------- PDF 원본 페이지 ---------- */
+let pdfSeq = 0;
+async function renderPdf() {
+  const seq = ++pdfSeq, doc = S.book && S.book.pdf; if (!doc) return;
+  const n = doc.numPages, idxs = spreadOn() ? [S.pdfCur, S.pdfCur + 1].filter(x => x < n) : [S.pdfCur];
+  const cs = getComputedStyle(pdfView);
+  const W = page.clientWidth - 16, H = page.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+  const dpr = Math.min(window.devicePixelRatio || 1, 2.5), out = [];
+  for (const k of idxs) {
+    const pg = await doc.getPage(k + 1); if (seq !== pdfSeq) return;
+    const v1 = pg.getViewport({ scale: 1 });
+    const cw = (W - (idxs.length - 1) * 12) / idxs.length;
+    const sc = Math.max(0.1, Math.min(cw / v1.width, H / v1.height));
+    const vp = pg.getViewport({ scale: sc * dpr });
+    const c = document.createElement('canvas');
+    c.width = Math.floor(vp.width); c.height = Math.floor(vp.height);
+    c.style.width = Math.floor(vp.width / dpr) + 'px'; c.style.height = Math.floor(vp.height / dpr) + 'px';
+    await pg.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+    if (seq !== pdfSeq) return;
+    out.push(c);
+  }
+  pdfView.replaceChildren(...out);
+  pdfView.classList.toggle('inv', isDark(colors().bg));
 }
 
-/* ---------- 리더: 위치 기록 ---------- */
+/* ---------- 위치 기록 ---------- */
 let recTimer = 0, pushTimer = 0;
 function recordPos() {
-  if (!S.book || S.book.loading || !S.book.moved) return;   // 직접 넘긴 적이 없으면 기록하지 않음(다른 기기 기록 보호)
+  if (!S.book || S.book.loading || !S.book.moved) return;
   S.book.moved = false;
   const p = getPos(); if (!p) return;
-  const prev = S.prog.files[S.book.id];
-  if (prev && prev.i === p.i && Math.abs((prev.f || 0) - p.f) < 0.02) return;
-  S.prog.files[S.book.id] = { name: S.book.name, i: p.i, f: +p.f.toFixed(3), pct: +pctOf(p.i).toFixed(1), t: Date.now() };
+  const prev = S.prog.files[S.book.id] || {};
+  if (!prev.del && prev.i === p.i && prev.pm === curPm() && Math.abs((prev.f || 0) - p.f) < 0.02) return;
+  const rec = { name: S.book.name, i: p.i, f: +p.f.toFixed(3), pct: +pctOf(p.i).toFixed(1), t: Date.now() };
+  if (S.book.kind === 'pdf') { rec.pm = curPm(); rec.pg = curPg(p.i); rec.pdfMode = S.book.view === 'pdfpage' ? 'page' : 'text'; }
+  S.prog.files[S.book.id] = rec;
   LS.set('prog', S.prog); markDirty();
 }
 page.addEventListener('scroll', () => {
-  if (!S.book || S.book.loading || paged()) return;
+  if (!S.book || S.book.loading || !isFlow() || paged()) return;
   if (Date.now() > (S.ignoreScrollUntil || 0)) S.book.moved = true;
   extendWindow();
   const p = getPos(); if (p) updatePct(pctOf(p.i));
-  clearTimeout(recTimer); recTimer = setTimeout(recordPos, 700);
+  clearTimeout(recTimer); recTimer = setTimeout(() => { recordPos(); updateBm(); }, 700);
 }, { passive: true });
 
-/* ---------- 리더: 열기·닫기 ---------- */
+/* ---------- 외부 라이브러리(필요할 때만 불러옴) ---------- */
+function loadScript(src) {
+  return new Promise((res, rej) => {
+    if (document.querySelector('script[data-src="' + src + '"]')) return res();
+    const s = document.createElement('script');
+    s.src = src; s.crossOrigin = 'anonymous'; s.dataset.src = src;
+    s.onload = res; s.onerror = () => { s.remove(); rej(new Error('보기 프로그램을 불러오지 못했습니다(인터넷 연결 확인).')); };
+    document.head.appendChild(s);
+  });
+}
+async function pdfjs() {
+  await loadScript(LIBS.pdf);
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = LIBS.pdfWorker;
+  return window.pdfjsLib;
+}
+
+/* ---------- TXT 목차 자동 인식 ---------- */
+const TOC_RE = /^[\s\[\(<《〈【「『#=*\-]*(제\s*[0-9０-９一二三四五六七八九十百千]+\s*[화장권부편회절막]|[0-9]+\s*[화장회](?![가-힣])|(chapter|ch\.?|episode|ep\.?)\s*[0-9]+|프롤로그|에필로그|외전|서장|종장|후기|작가의\s*말|prologue|epilogue)/i;
+function detectToc(lines) {
+  const out = [];
+  for (let i = 0; i < lines.length && out.length < 5000; i++) {
+    const s = typeof lines[i] === 'string' ? lines[i].trim() : '';
+    if (s && s.length <= 40 && TOC_RE.test(s)) out.push({ title: s, i, level: 1 });
+  }
+  return out;
+}
+
+/* ---------- EPUB → 블록 ---------- */
+const dirOf = p => p.includes('/') ? p.slice(0, p.lastIndexOf('/') + 1) : '';
+function resolvePath(base, href) {
+  const parts = (base + href).split('/'), out = [];
+  for (const x of parts) { if (x === '..') out.pop(); else if (x !== '.' && x !== '') out.push(x); }
+  return out.join('/');
+}
+const safeDecode = s => { try { return decodeURIComponent(s); } catch { return s; } };
+function parseXml(str, html) {
+  const p = new DOMParser();
+  if (!html) { const d = p.parseFromString(str, 'application/xhtml+xml'); if (!d.getElementsByTagName('parsererror').length) return d; }
+  return p.parseFromString(str, 'text/html');
+}
+const BLOCK_TAGS = new Set(['p', 'div', 'li', 'blockquote', 'pre', 'dt', 'dd', 'section', 'article', 'body', 'table', 'tr', 'td', 'th',
+  'ul', 'ol', 'dl', 'figure', 'figcaption', 'header', 'footer', 'aside', 'nav', 'main', 'center', 'hr', 'caption', 'tbody', 'thead']);
+const MIME = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif', webp: 'image/webp', svg: 'image/svg+xml' };
+async function parseEpub(buf, onProg) {
+  await loadScript(LIBS.zip);
+  const zip = await window.JSZip.loadAsync(buf);
+  const file = p => zip.file(p) || zip.file(safeDecode(p));
+  const read = async p => { const f = file(p); return f ? f.async('string') : null; };
+  const cont = await read('META-INF/container.xml');
+  if (!cont) throw new Error('EPUB 형식이 올바르지 않습니다.');
+  const opfPath = parseXml(cont).getElementsByTagNameNS('*', 'rootfile')[0].getAttribute('full-path');
+  const opfDir = dirOf(opfPath), opf = parseXml(await read(opfPath));
+  const man = {};
+  for (const it of opf.getElementsByTagNameNS('*', 'item'))
+    man[it.getAttribute('id')] = { href: resolvePath(opfDir, it.getAttribute('href')), type: it.getAttribute('media-type') || '', props: it.getAttribute('properties') || '' };
+  const spineEl = opf.getElementsByTagNameNS('*', 'spine')[0];
+  const spine = [...spineEl.getElementsByTagNameNS('*', 'itemref')].map(r => man[r.getAttribute('idref')]).filter(Boolean);
+  const blocks = [], anchors = {}, urls = [];
+  let pending = '';
+  const norm = s => s.replace(/\s+/g, ' ').trim();
+  const flush = () => { const t = norm(pending); pending = ''; if (t) blocks.push(t); };
+  async function pushImg(el, href) {
+    const src = el.getAttribute('src') || el.getAttribute('xlink:href') || el.getAttributeNS('http://www.w3.org/1999/xlink', 'href') || el.getAttribute('href');
+    if (!src || /^data:|^https?:/i.test(src)) return;
+    const path = resolvePath(dirOf(href), src.split('#')[0]), f = file(path);
+    if (!f) return;
+    const ext = path.split('.').pop().toLowerCase();
+    const url = URL.createObjectURL(new Blob([await f.async('arraybuffer')], { type: MIME[ext] || 'image/*' }));
+    urls.push(url); blocks.push({ img: url });
+  }
+  async function walk(el, href) {
+    for (const n of [...el.childNodes]) {
+      if (n.nodeType === 3) { pending += n.nodeValue; continue; }
+      if (n.nodeType !== 1) continue;
+      const tag = (n.localName || '').toLowerCase();
+      if (tag === 'script' || tag === 'style' || tag === 'head' || tag === 'title') continue;
+      const id = n.getAttribute && n.getAttribute('id');
+      if (id) anchors[href + '#' + id] = blocks.length + (norm(pending) ? 1 : 0);
+      if (tag === 'br') { flush(); continue; }
+      if (tag === 'img' || tag === 'image') { flush(); await pushImg(n, href); continue; }
+      if (/^h[1-6]$/.test(tag)) {
+        flush();
+        const t = norm(n.textContent);
+        if (t) blocks.push({ h: +tag[1], text: t });
+        for (const im of n.querySelectorAll('img,image')) await pushImg(im, href);
+        continue;
+      }
+      if (BLOCK_TAGS.has(tag) || tag === 'svg') { flush(); await walk(n, href); flush(); continue; }
+      await walk(n, href);
+    }
+  }
+  for (let k = 0; k < spine.length; k++) {
+    const it = spine[k], html = await read(it.href);
+    if (html == null) continue;
+    anchors[it.href] = blocks.length;
+    const doc = parseXml(html, !/xhtml|xml/.test(it.type));
+    await walk(doc.body || doc.documentElement, it.href); flush();
+    if (onProg) onProg(k + 1, spine.length);
+  }
+  const where = (base, href) => {
+    const [p, frag] = href.split('#'), full = resolvePath(dirOf(base), safeDecode(p));
+    const v = frag != null ? anchors[full + '#' + frag] : undefined;
+    return v != null ? v : anchors[full] != null ? anchors[full] : anchors[safeDecode(full)];
+  };
+  const toc = [];
+  const navItem = Object.values(man).find(m => m.props.split(/\s+/).includes('nav'));
+  if (navItem) {
+    const nd = parseXml(await read(navItem.href) || '');
+    const navs = [...nd.getElementsByTagName('nav')];
+    const nav = navs.find(x => (x.getAttribute('epub:type') || x.getAttributeNS('http://www.idpf.org/2007/ops', 'type') || '').includes('toc')) || navs[0];
+    const walkOl = (ol, lv) => {
+      for (const li of ol.children) {
+        if ((li.localName || '').toLowerCase() !== 'li') continue;
+        const a = [...li.children].find(c => /^(a|span)$/i.test(c.localName));
+        if (a) { const href = a.getAttribute('href'), i = href ? where(navItem.href, href) : undefined; const t = norm(a.textContent); if (t && i != null) toc.push({ title: t, i, level: lv }); }
+        const sub = [...li.children].find(c => /^ol$/i.test(c.localName));
+        if (sub) walkOl(sub, lv + 1);
+      }
+    };
+    const ol = nav && [...nav.children].find(c => /^ol$/i.test(c.localName));
+    if (ol) walkOl(ol, 1);
+  }
+  if (!toc.length) {
+    const ncxId = spineEl.getAttribute('toc'), ncx = ncxId && man[ncxId];
+    if (ncx) {
+      const nd = parseXml(await read(ncx.href) || '');
+      const walkNp = (el, lv) => {
+        for (const np of el.children) {
+          if ((np.localName || '') !== 'navPoint') continue;
+          const lab = np.getElementsByTagNameNS('*', 'text')[0], ct = np.getElementsByTagNameNS('*', 'content')[0];
+          const i = ct ? where(ncx.href, ct.getAttribute('src')) : undefined;
+          if (lab && i != null) toc.push({ title: norm(lab.textContent), i, level: lv });
+          walkNp(np, lv + 1);
+        }
+      };
+      const map = nd.getElementsByTagNameNS('*', 'navMap')[0];
+      if (map) walkNp(map, 1);
+    }
+  }
+  if (!blocks.length) blocks.push('');
+  return { blocks, toc, urls };
+}
+
+/* ---------- PDF ---------- */
+async function pdfOutline(doc) {
+  const out = [];
+  let ol = null; try { ol = await doc.getOutline(); } catch {}
+  const walk = async (items, lv) => {
+    for (const it of items || []) {
+      try {
+        let dest = it.dest;
+        if (typeof dest === 'string') dest = await doc.getDestination(dest);
+        if (Array.isArray(dest) && dest[0]) {
+          const pg = typeof dest[0] === 'number' ? dest[0] : await doc.getPageIndex(dest[0]);
+          out.push({ title: (it.title || '').trim() || '(제목 없음)', pg, level: lv });
+        }
+      } catch {}
+      if (it.items && it.items.length) await walk(it.items, lv + 1);
+    }
+  };
+  await walk(ol, 1);
+  return out;
+}
+/* PDF 글자 추출: 줄을 문단으로 합침, 쪽마다 시작 블록 기록 */
+async function pdfExtract(onProg) {
+  const B = S.book;
+  if (B.pdfText) return B.pdfText;
+  const key = cacheKey(B.id) + '|text';
+  try { const c = await IDB.get(key); if (c && c.sha === B.sha) return (B.pdfText = c); } catch {}
+  const doc = B.pdf, blocks = [], pageStart = [];
+  for (let p = 1; p <= doc.numPages; p++) {
+    const tc = await (await doc.getPage(p)).getTextContent();
+    const lines = []; let cur = '', lastY = null;
+    for (const it of tc.items) {
+      const y = it.transform ? Math.round(it.transform[5]) : null;
+      if (lastY != null && y != null && Math.abs(y - lastY) > 2 && cur) { lines.push(cur); cur = ''; }
+      cur += it.str || ''; lastY = y;
+      if (it.hasEOL) { lines.push(cur); cur = ''; lastY = null; }
+    }
+    if (cur) lines.push(cur);
+    pageStart.push(blocks.length);
+    const lens = lines.map(l => l.trim().length).filter(Boolean).sort((a, b) => a - b);
+    const med = lens.length ? lens[lens.length >> 1] : 0;
+    let para = '';
+    for (const raw of lines) {
+      const t = raw.trim();
+      if (!t) { if (para) { blocks.push(para); para = ''; } continue; }
+      para += (para ? ' ' : '') + t;
+      if (/[.!?。」』"”’…)\]]$/.test(t) || t.length < med * 0.6) { blocks.push(para); para = ''; }
+    }
+    if (para) blocks.push(para);
+    if (onProg && (p % 5 === 0 || p === doc.numPages)) onProg(p, doc.numPages);
+  }
+  if (!blocks.length) blocks.push('');
+  B.pdfText = { key, sha: B.sha, blocks, pageStart };
+  try { await IDB.put(B.pdfText); } catch {}
+  return B.pdfText;
+}
+async function setPdfView(v, keepPg) {
+  const B = S.book;
+  if (v === 'text') {
+    $('#loading').hidden = false; $('#loading').textContent = '글자를 추출하는 중…';
+    const t = await pdfExtract((p, n) => { $('#loading').textContent = `글자를 추출하는 중… ${p}/${n}쪽`; });
+    $('#loading').hidden = true;
+    if (B !== S.book) return;
+    if (t.blocks.length <= 1 && !t.blocks[0]) toast('글자를 찾지 못했습니다(스캔 이미지 PDF일 수 있음). 원본 페이지로 보세요.');
+    B.view = 'flow'; B.lines = t.blocks; B.pageStart = t.pageStart;
+  } else {
+    B.view = 'pdfpage'; B.lines = new Array(B.pdf.numPages).fill(''); B.pageStart = B.pdfText ? B.pdfText.pageStart : null;
+  }
+  B.toc = B.tocPg.map(x => ({ title: x.title, level: x.level, i: v === 'text' ? B.pageStart[Math.min(x.pg, B.pageStart.length - 1)] : x.pg }));
+  applyView(); rebuildMarks();
+  if (keepPg != null) goTo(v === 'text' ? B.pageStart[Math.min(keepPg, B.pageStart.length - 1)] : keepPg, 0);
+}
+function applyView() {
+  const R = $('#reader'), flow = isFlow();
+  R.classList.toggle('paged', flow && paged());
+  R.classList.toggle('pdfpage', !flow);
+  textEl.hidden = !flow; pdfView.hidden = flow;
+  if (flow) pdfView.replaceChildren(); else textEl.textContent = '';
+  $('#pdfField').hidden = !(S.book && S.book.kind === 'pdf');
+  for (const b of $('#pdfChips').children) b.setAttribute('aria-pressed', b.dataset.pdf === (flow ? 'text' : 'page'));
+}
+
+/* ---------- 열기·닫기 ---------- */
+function startPos(rec) {
+  if (!rec || rec.del) return { i: 0, f: 0 };
+  const B = S.book;
+  if (B.kind !== 'pdf') return { i: rec.i || 0, f: rec.f || 0 };
+  if (rec.pm === curPm()) return { i: rec.i || 0, f: rec.f || 0 };
+  const pg = rec.pg || 0;
+  return isFlow() ? { i: B.pageStart[Math.min(pg, B.pageStart.length - 1)] || 0, f: 0 } : { i: pg, f: 0 };
+}
 async function openBook(id, name, sha) {
   const seq = ++S.openSeq;
-  S.book = { id, name, lines: [''], loading: true };
-  textEl.textContent = '';
-  $('#bookTitle').textContent = name.replace(/\.txt$/i, '');
+  closeBookRes();
+  S.book = { id, name, kind: kindOf(name) || 'txt', view: 'flow', lines: [''], toc: [], loading: true };
+  textEl.textContent = ''; pdfView.replaceChildren();
+  $('#bookTitle').textContent = name.replace(BOOK_RE, '');
   $('#loading').hidden = false; $('#loading').textContent = '불러오는 중…';
   $('#reader').classList.add('hide-chrome');
-  show('reader');
+  applyView(); show('reader');
   try {
     const kept = S.cache[cacheKey(id)];
     if (!kept || (sha && kept.sha !== sha)) $('#loading').textContent = '내려받는 중…' + (kept ? ' (새 버전)' : '');
@@ -772,99 +1457,279 @@ async function openBook(id, name, sha) {
     ]);
     if (seq !== S.openSeq) return;
     if (got.from === 'offline') toast('인터넷 연결이 없어 기기에 보관된 내용으로 엽니다.');
-    S.book.lines = decodeText(got.buf).replace(/\r\n?/g, '\n').split('\n');
-    S.book.loading = false;
+    const B = S.book; B.sha = got.sha;
+    const rec = S.prog.files[id];
+    if (B.kind === 'epub') {
+      $('#loading').textContent = 'EPUB을 여는 중…';
+      const r = await parseEpub(got.buf.slice(0), (k, n) => { $('#loading').textContent = `EPUB을 여는 중… ${k}/${n}`; });
+      if (seq !== S.openSeq) { r.urls.forEach(u => URL.revokeObjectURL(u)); return; }
+      B.lines = r.blocks; B.toc = r.toc; B.urls = r.urls;
+    } else if (B.kind === 'pdf') {
+      $('#loading').textContent = 'PDF를 여는 중…';
+      const lib = await pdfjs();
+      B.pdf = await lib.getDocument({ data: new Uint8Array(got.buf.slice(0)), cMapUrl: PDFJS + 'cmaps/', cMapPacked: true, standardFontDataUrl: PDFJS + 'standard_fonts/' }).promise;
+      if (seq !== S.openSeq) return;
+      B.tocPg = await pdfOutline(B.pdf);
+      const want = rec && !rec.del && rec.pdfMode === 'text' ? 'text' : 'page';
+      if (want === 'page') { try { const c = await IDB.get(cacheKey(id) + '|text'); if (c && c.sha === B.sha) B.pdfText = c; } catch {} }
+      await setPdfView(want);
+      if (seq !== S.openSeq) return;
+    } else {
+      B.lines = decodeText(got.buf).replace(/\r\n?/g, '\n').split('\n');
+      B.toc = detectToc(B.lines);
+    }
+    B.loading = false;
     $('#loading').hidden = true;
-    const r = S.prog.files[id];
-    goTo(r ? r.i : 0, r ? r.f : 0);
-    S.book.openedAt = Date.now();
+    applyView(); rebuildMarks();
+    const sp = startPos(rec);
+    goTo(sp.i, sp.f);
     page.focus({ preventScroll: true });
     clearInterval(pushTimer); pushTimer = setInterval(() => { recordPos(); pushProg(); }, PUSH_EVERY);
   } catch (e) {
     if (seq !== S.openSeq) return;
     if (onAuthFail(e)) return;
-    $('#loading').textContent = errMsg(e);
+    $('#loading').hidden = false;
+    $('#loading').textContent = e instanceof ApiErr ? errMsg(e) : (e && e.message) || '열 수 없는 파일입니다.';
     $('#reader').classList.remove('hide-chrome');
   }
+}
+function closeBookRes() {
+  const B = S.book; if (!B) return;
+  (B.urls || []).forEach(u => URL.revokeObjectURL(u));
+  if (B.pdf) { try { B.pdf.destroy(); } catch {} }
 }
 function closeBook() {
   if (S.book && !S.book.loading) recordPos();
   clearInterval(pushTimer);
-  S.book = null; S.openSeq++;
-  textEl.textContent = '';
-  closeSheets();
-  pushProg();
-  openLibrary();
+  closeBookRes();
+  S.book = null; S.openSeq++; S.findMark = null;
+  textEl.textContent = ''; pdfView.replaceChildren();
+  hideSelBar(); closeSheets(); pushProg(); openLibrary();
 }
 $('#backBtn').onclick = closeBook;
-$('#syncBtn').onclick = async () => {
-  const btn = $('#syncBtn');
-  if (!S.book || S.book.loading || btn.classList.contains('busy')) return;
-  btn.classList.add('busy');
-  const book = S.book;
-  recordPos();
-  const mine = S.prog.files[book.id];
-  try {
-    await pushProg();      // 남은 저장 먼저 처리
-    await pullProg();      // 다른 기기 기록 받아서 합치기
-    markDirty(); await pushProg();
-    if (syncState.s === 'fail') throw new Error(syncState.msg);
-    const r = S.prog.files[book.id];
-    const cur = getPos();
-    if (book === S.book && r && cur && r !== mine && (r.t || 0) > ((mine && mine.t) || 0) && Math.abs(r.i - cur.i) > 2)
-      toast('다른 기기에서 ' + (r.pct || 0).toFixed(1) + '%까지 읽었습니다.', '이동', () => { goTo(r.i, r.f); S.book.moved = true; recordPos(); });
-    else toast('동기화했습니다.');
-  } catch (e) {
-    if (!onAuthFail(e)) toast(e instanceof ApiErr ? errMsg(e) : '동기화 실패: ' + e.message);
-  } finally { btn.classList.remove('busy'); }
+
+/* ---------- 검색 ---------- */
+async function runFind() {
+  const q = $('#findQ').value.trim(), info = $('#findInfo'), list = $('#findList');
+  list.innerHTML = ''; if (!q || !S.book) { info.textContent = ''; return; }
+  let lines = S.book.lines, toPage = null;
+  if (!isFlow()) {
+    info.textContent = '글자를 추출하는 중…';
+    const t = await pdfExtract((p, n) => { info.textContent = `글자를 추출하는 중… ${p}/${n}쪽`; });
+    lines = t.blocks; S.book.pageStart = t.pageStart; toPage = true;
+  }
+  const ql = q.toLowerCase(), res = [];
+  for (let i = 0; i < lines.length && res.length < 500; i++) {
+    const t = typeof lines[i] === 'string' ? lines[i] : (lines[i] && lines[i].text) || '';
+    let o = t.toLowerCase().indexOf(ql);
+    while (o >= 0 && res.length < 500) { res.push({ i, o, t }); o = t.toLowerCase().indexOf(ql, o + ql.length); }
+  }
+  info.textContent = res.length ? `${res.length >= 500 ? '500개 이상' : res.length + '개'} 찾음` : '찾는 내용이 없습니다.';
+  list.innerHTML = res.map((r, k) => {
+    const a = Math.max(0, r.o - 24), pre = r.t.slice(a, r.o), hit = r.t.slice(r.o, r.o + q.length), post = r.t.slice(r.o + q.length, r.o + q.length + 40);
+    const where = toPage ? (pageOfBlock(r.i) + 1) + '쪽' : pctOf(r.i).toFixed(1) + '%';
+    return `<div class="li"><button class="go" data-k="${k}">${a ? '…' : ''}${esc(pre)}<mark>${esc(hit)}</mark>${esc(post)}…<small>${where}</small></button></div>`;
+  }).join('');
+  list.onclick = e => {
+    const b = e.target.closest('button[data-k]'); if (!b) return;
+    const r = res[+b.dataset.k]; closeSheets();
+    if (toPage) { goTo(pageOfBlock(r.i), 0); }
+    else {
+      S.findMark = { i: r.i, o: r.o, len: q.length };
+      const len = r.t.length || 1;
+      goTo(r.i, Math.max(0, r.o / len - 0.02));
+      clearTimeout(S.findTimer); S.findTimer = setTimeout(() => { S.findMark = null; refreshVisible(); }, 6000);
+    }
+    S.book.moved = true; recordPos();
+  };
+}
+$('#findBtn').onclick = () => { if (!S.book || S.book.loading) return; openSheet('find'); setTimeout(() => $('#findQ').focus(), 50); };
+$('#findGo').onclick = runFind;
+$('#findQ').addEventListener('keydown', e => { if (e.key === 'Enter') runFind(); });
+
+/* ---------- 북마크·하이라이트·메모 ---------- */
+const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const notesOf = id => Object.values((S.prog.notes && S.prog.notes[id]) || {}).filter(x => !x.del);
+function saveNote(it) {
+  it.t = Date.now();
+  const id = S.book.id;
+  (S.prog.notes[id] = S.prog.notes[id] || {})[it.id] = it;
+  LS.set('prog', S.prog); markDirty(); pushSoon();
+  rebuildMarks(); refreshVisible(); updateBm();
+}
+/* 다른 보기(PDF 원본/글자)에서 만든 항목의 위치 변환 */
+function noteIdx(it) {
+  const i = it.type === 'hl' ? it.s.i : it.i;
+  if (it.pm === curPm()) return i;
+  if (it.pg == null) return i;
+  return isFlow() ? (S.book.pageStart ? S.book.pageStart[Math.min(it.pg, S.book.pageStart.length - 1)] : 0) : it.pg;
+}
+function jumpNote(it) {
+  closeSheets();
+  goTo(noteIdx(it), it.pm === curPm() && it.type === 'bm' ? it.f || 0 : 0);
+  S.book.moved = true; recordPos();
+}
+const snippet = i => blockText(i).replace(/\s+/g, ' ').trim().slice(0, 80);
+function updateBm() {
+  if (!S.book || S.book.loading) return;
+  const a = getPos(); if (!a) return;
+  const b = Math.max(a.i, lastVisible());
+  const on = notesOf(S.book.id).some(it => it.type === 'bm' && (x => x >= a.i && x <= b)(noteIdx(it)));
+  $('#bmBtn').setAttribute('aria-pressed', on);
+  $('#bmBtn svg').style.fill = on ? 'currentColor' : 'none';
+}
+$('#bmBtn').onclick = () => {
+  if (!S.book || S.book.loading) return;
+  const a = getPos(), b = Math.max(a.i, lastVisible());
+  const hits = notesOf(S.book.id).filter(it => it.type === 'bm' && (x => x >= a.i && x <= b)(noteIdx(it)));
+  if (hits.length) { for (const it of hits) { it.del = true; saveNote(it); } toast('북마크를 지웠습니다.'); return; }
+  const txt = isFlow() ? snippet(a.i) : (a.i + 1) + '쪽';
+  saveNote({ id: newId(), type: 'bm', i: a.i, f: +a.f.toFixed(3), pm: curPm(), pg: curPg(a.i), text: txt, pct: +pctOf(a.i).toFixed(1) });
+  toast('북마크했습니다.');
 };
 
-/* ---------- 리더: 조작 ---------- */
+/* 글자 선택 → 하이라이트 */
+const selBar = $('#selBar');
+const nodeP = n => { const el = n && (n.nodeType === 1 ? n : n.parentElement); return el ? el.closest('p[data-i]') : null; };
+function offIn(p, node, off) {
+  if (node === p) { let n = 0; for (let k = 0; k < off; k++) n += p.childNodes[k].textContent.length; return n; }
+  const rg = document.createRange(); rg.setStart(p, 0); rg.setEnd(node, off); return rg.toString().length;
+}
+function selInfo() {
+  const sel = getSelection();
+  if (!S.book || !isFlow() || !sel || sel.isCollapsed || !sel.rangeCount) return null;
+  const r = sel.getRangeAt(0), pa = nodeP(r.startContainer), pb = nodeP(r.endContainer);
+  if (!pa || !pb || !textEl.contains(pa) || !textEl.contains(pb)) return null;
+  const s = { i: +pa.dataset.i, o: offIn(pa, r.startContainer, r.startOffset) };
+  let e = { i: +pb.dataset.i, o: offIn(pb, r.endContainer, r.endOffset) };
+  if (e.o === 0 && e.i > s.i) e = { i: e.i - 1, o: blockText(e.i - 1).length };
+  if (e.i < s.i || (e.i === s.i && e.o <= s.o)) return null;
+  return { s, e, text: String(sel).replace(/\s+/g, ' ').trim().slice(0, 500), rect: r.getBoundingClientRect() };
+}
+let lastSel = null, selTimer = 0;
+document.addEventListener('selectionchange', () => {
+  clearTimeout(selTimer);
+  selTimer = setTimeout(() => {
+    const si = !$('#reader').hidden ? selInfo() : null;
+    if (!si) { hideSelBar(); return; }
+    lastSel = si;
+    selBar.hidden = false;
+    const bw = selBar.offsetWidth, bh = selBar.offsetHeight, r = si.rect;
+    let top = r.bottom + 10; if (top + bh > innerHeight - 10) top = Math.max(10, r.top - bh - 10);
+    const left = Math.max(8, Math.min(innerWidth - bw - 8, r.left + r.width / 2 - bw / 2));
+    selBar.style.top = top + 'px'; selBar.style.left = left + 'px';
+  }, 220);
+});
+function hideSelBar() { selBar.hidden = true; }
+selBar.addEventListener('pointerdown', e => e.preventDefault());
+selBar.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b || !lastSel) return;
+  const si = lastSel; lastSel = null;
+  const it = { id: newId(), type: 'hl', s: si.s, e: si.e, c: b.dataset.c === 'memo' ? 'y' : b.dataset.c, text: si.text, memo: '',
+    pm: curPm(), pg: curPg(si.s.i), pct: +pctOf(si.s.i).toFixed(1) };
+  getSelection().removeAllRanges(); hideSelBar();
+  saveNote(it);
+  if (b.dataset.c === 'memo') openNote(it);
+});
+
+/* 메모 편집 */
+let noteCtx = null;
+function openNote(it) {
+  noteCtx = it;
+  $('#noteTitle').textContent = it.type === 'bm' ? '북마크 메모' : '하이라이트·메모';
+  $('#noteQuote').textContent = it.text || '';
+  $('#noteColors').hidden = it.type !== 'hl';
+  for (const b of $('#noteColors').children) b.setAttribute('aria-pressed', b.dataset.c === it.c);
+  $('#noteText').value = it.memo || '';
+  openSheet('note');
+}
+$('#noteColors').onclick = e => { const b = e.target.closest('button'); if (!b || !noteCtx) return; noteCtx.c = b.dataset.c; for (const x of $('#noteColors').children) x.setAttribute('aria-pressed', x === b); };
+$('#noteSave').onclick = () => { if (!noteCtx) return; noteCtx.memo = $('#noteText').value.trim(); saveNote(noteCtx); closeSheets(); };
+$('#noteDel').onclick = () => { if (!noteCtx) return; if (!confirm('삭제할까요?')) return; noteCtx.del = true; saveNote(noteCtx); closeSheets(); };
+
+/* 목차·북마크·메모 패널 */
+let panelTab = 'toc';
+function renderPanel() {
+  for (const b of document.querySelectorAll('#panelSheet .tabs button')) b.setAttribute('aria-selected', b.dataset.tab === panelTab);
+  const body = $('#panelBody'), B = S.book; if (!B) return;
+  const cur = getPos() ? getPos().i : 0;
+  if (panelTab === 'toc') {
+    const toc = B.toc || [];
+    if (!toc.length) { body.innerHTML = '<p class="info">목차를 찾지 못했습니다. TXT는 "제1화", "1장", "Chapter 1", "프롤로그" 같은 줄을 목차로 인식합니다.</p>'; return; }
+    let curK = -1; toc.forEach((x, k) => { if (x.i <= cur) curK = k; });
+    body.innerHTML = toc.map((x, k) => `<div class="li"><button class="go${k === curK ? ' cur' : ''}" data-toc="${k}" style="padding-left:${2 + (x.level - 1) * 16}px">${esc(x.title)}<small>${isFlow() ? pctOf(x.i).toFixed(1) + '%' : (x.i + 1) + '쪽'}</small></button></div>`).join('');
+    const c = body.querySelector('.cur'); if (c) c.scrollIntoView({ block: 'center' });
+    return;
+  }
+  const list = notesOf(B.id).filter(it => panelTab === 'bm' ? it.type === 'bm' : (it.type === 'hl' || it.memo)).sort((a, b) => noteIdx(a) - noteIdx(b));
+  if (!list.length) { body.innerHTML = `<p class="info">${panelTab === 'bm' ? '북마크가 없습니다. 상단 책갈피 버튼으로 추가하세요.' : '하이라이트가 없습니다. 글자를 길게 눌러 선택하면 색을 고를 수 있습니다.'}</p>`; return; }
+  body.innerHTML = list.map(it => {
+    const where = it.pm === 'page' ? (it.pg + 1) + '쪽' : (it.pct != null ? it.pct.toFixed(1) + '%' : '');
+    const dot = it.type === 'bm' ? 'c-bm' : 'c-' + it.c;
+    return `<div class="li"><span class="dot ${dot}"></span><button class="go" data-note="${it.id}">${esc(it.text || '')}${it.memo ? `<small>메모: ${esc(it.memo)}</small>` : ''}<small>${where}</small></button><button class="x" data-edit="${it.id}">편집</button></div>`;
+  }).join('');
+}
+$('#panelBtn').onclick = () => { if (!S.book || S.book.loading) return; renderPanel(); openSheet('panel'); };
+$('#panelSheet').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.tab) { panelTab = b.dataset.tab; renderPanel(); return; }
+  const items = S.prog.notes[S.book.id] || {};
+  if (b.dataset.toc != null) { const x = S.book.toc[+b.dataset.toc]; closeSheets(); goTo(x.i, 0); S.book.moved = true; recordPos(); }
+  else if (b.dataset.note) jumpNote(items[b.dataset.note]);
+  else if (b.dataset.edit) { closeSheets(); openNote(items[b.dataset.edit]); }
+});
+
+/* ---------- 조작 ---------- */
 let seeking = false;
 $('#seek').addEventListener('input', e => { seeking = true; $('#pct').textContent = (e.target.value / 10).toFixed(1) + '%'; });
 $('#seek').addEventListener('change', e => {
   seeking = false;
   if (!S.book || S.book.loading) return;
-  goTo(Math.round(e.target.value / 1000 * (S.book.lines.length - 1)), 0);
+  goTo(Math.round(e.target.value / 1000 * (units() - 1)), 0);
   S.book.moved = true; recordPos();
 });
 function pageBy(d) {
-  if (paged()) return turn(d);
-  const lh = S.set.size * S.set.lh;
-  page.scrollBy(0, d * Math.max(80, page.clientHeight - lh * 1.5));
+  if (!isFlow() || paged()) return turn(d);
+  page.scrollBy(0, d * Math.max(80, page.clientHeight - S.set.size * S.set.lh * 1.5));
 }
+const turnable = () => !isFlow() || paged();
 let touch0 = null, swiped = false;
 page.addEventListener('touchstart', e => {
-  if (!paged() || e.touches.length !== 1) { touch0 = null; return; }
+  if (!turnable() || e.touches.length !== 1) { touch0 = null; return; }
   touch0 = { x: e.touches[0].clientX, y: e.touches[0].clientY };
 }, { passive: true });
 page.addEventListener('touchend', e => {
   if (!touch0 || !S.book || S.book.loading) return;
   const t = e.changedTouches[0], dx = t.clientX - touch0.x, dy = t.clientY - touch0.y;
   touch0 = null;
-  if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-    swiped = true; setTimeout(() => { swiped = false; }, 400);
-    $('#reader').classList.add('hide-chrome');
-    turn(dx < 0 ? 1 : -1);
-  }
+  if (String(getSelection()).length) return;
+  let d = 0;
+  if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) d = dx < 0 ? 1 : -1;
+  else if (S.set.axis === 'y' && Math.abs(dy) > 40 && Math.abs(dy) > Math.abs(dx) * 1.5) d = dy < 0 ? 1 : -1;
+  if (d) { swiped = true; setTimeout(() => { swiped = false; }, 400); $('#reader').classList.add('hide-chrome'); turn(d); }
 }, { passive: true });
 page.addEventListener('click', e => {
   if (!S.book || S.book.loading || swiped) return;
-  const sel = window.getSelection && window.getSelection();
-  if (sel && String(sel).length) return;
+  if (String(getSelection()).length) return;
+  const hl = e.target.closest && e.target.closest('[data-hl]');
+  if (hl) { const it = (S.prog.notes[S.book.id] || {})[hl.dataset.hl]; if (it && !it.del) { openNote(it); return; } }
   const R = $('#reader');
   if (!R.classList.contains('hide-chrome')) { R.classList.add('hide-chrome'); return; }
-  const w = page.clientWidth, x = e.clientX - page.getBoundingClientRect().left;
-  const tap = paged() || S.set.tap;
-  if (tap && x < w * 0.3) pageBy(-1);
-  else if (tap && x > w * 0.7) pageBy(1);
+  const rc = page.getBoundingClientRect();
+  const tap = turnable() || S.set.tap;
+  const pos = S.set.axis === 'y' ? (e.clientY - rc.top) / rc.height : (e.clientX - rc.left) / rc.width;
+  if (tap && pos < 0.3) pageBy(-1);
+  else if (tap && pos > 0.7) pageBy(1);
   else R.classList.remove('hide-chrome');
 });
 document.addEventListener('keydown', e => {
-  if ($('#reader').hidden || !S.book || e.target.tagName === 'INPUT') return;
-  if (e.key === 'ArrowRight' || e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey)) { e.preventDefault(); pageBy(1); }
-  else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || (e.key === ' ' && e.shiftKey)) { e.preventDefault(); pageBy(-1); }
-  else if (e.key === 'Escape') closeSheets();
+  if ($('#reader').hidden || !S.book || /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+  if (e.key === 'Escape') { closeSheets(); return; }
+  if (!openSheets().length) {
+    const next = ['ArrowRight', 'PageDown'].includes(e.key) || (e.key === ' ' && !e.shiftKey) || (e.key === 'ArrowDown' && turnable());
+    const prev = ['ArrowLeft', 'PageUp'].includes(e.key) || (e.key === ' ' && e.shiftKey) || (e.key === 'ArrowUp' && turnable());
+    if (next) { e.preventDefault(); pageBy(1); } else if (prev) { e.preventDefault(); pageBy(-1); }
+  }
 });
 
 /* ---------- 보기 설정 ---------- */
@@ -879,23 +1744,39 @@ async function ensureFont(id) {
   }
   try { await Promise.race([document.fonts.load('20px "' + f.fam + '"', '가나다'), new Promise(r => setTimeout(r, 3000))]); } catch {}
 }
+const isDark = hex => { const h = hex.replace('#', ''); const n = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16); return ((n >> 16 & 255) * .299 + (n >> 8 & 255) * .587 + (n & 255) * .114) < 128; };
+const toMin = s => { const [h, m] = (s || '0:0').split(':').map(Number); return (h || 0) * 60 + (m || 0); };
+function nightOn() {
+  const s = S.set;
+  if (s.dark === 'system') return matchMedia('(prefers-color-scheme: dark)').matches;
+  if (s.dark === 'time') {
+    const a = toMin(s.darkFrom), b = toMin(s.darkTo), d = new Date(), c = d.getHours() * 60 + d.getMinutes();
+    return a === b ? false : a < b ? (c >= a && c < b) : (c >= a || c < b);
+  }
+  return false;
+}
+const colors = () => nightOn() && !isDark(S.set.bg) ? NIGHT : { bg: S.set.bg, fg: S.set.fg };
+let lastNight = null;
 function applySettings() {
-  const R = $('#reader').style, s = S.set;
-  R.setProperty('--rbg', s.bg); R.setProperty('--rfg', s.fg);
+  const R = $('#reader').style, s = S.set, c = colors();
+  lastNight = nightOn();
+  R.setProperty('--rbg', c.bg); R.setProperty('--rfg', c.fg);
   R.setProperty('--rfont', fontById(s.font).stack);
   R.setProperty('--rsize', s.size + 'px'); R.setProperty('--rlh', s.lh);
   R.setProperty('--rmargin', s.margin + 'px');
-  if (!$('#reader').hidden) document.querySelector('meta[name=theme-color]').content = s.bg;
-  $('#o-size').textContent = s.size + 'px';
-  $('#o-lh').textContent = s.lh.toFixed(1);
-  $('#o-margin').textContent = s.margin + 'px';
+  if (!$('#reader').hidden) document.querySelector('meta[name=theme-color]').content = c.bg;
+  $('#o-size').textContent = s.size + 'px'; $('#o-lh').textContent = s.lh.toFixed(1); $('#o-margin').textContent = s.margin + 'px';
   $('#bgPick').value = s.bg; $('#fgPick').value = s.fg;
-  $('#tapToggle').checked = !!s.tap;
-  $('#reader').classList.toggle('paged', paged());
+  $('#tapToggle').checked = !!s.tap; $('#spreadToggle').checked = !!s.spread;
   $('#tapField').hidden = paged();
-  for (const b of $('#modeChips').children) b.setAttribute('aria-pressed', b.dataset.mode === (paged() ? 'page' : 'scroll'));
-  for (const b of $('#fontChips').children) b.setAttribute('aria-pressed', b.dataset.font === s.font);
+  $('#darkTimes').hidden = s.dark !== 'time';
+  $('#darkFrom').value = s.darkFrom; $('#darkTo').value = s.darkTo;
+  const press = (sel, attr, val) => { for (const b of $(sel).children) b.setAttribute('aria-pressed', b.dataset[attr] === val); };
+  press('#modeChips', 'mode', paged() ? 'page' : 'scroll'); press('#axisChips', 'axis', s.axis); press('#darkChips', 'dark', s.dark);
+  press('#fontChips', 'font', s.font);
   for (const b of $('#themeSw').children) b.setAttribute('aria-pressed', b.dataset.bg === s.bg && b.dataset.fg === s.fg);
+  if (S.book && !S.book.loading) applyView();
+  if (S.book && S.book.pdf && !isFlow()) pdfView.classList.toggle('inv', isDark(c.bg));
 }
 async function changeSetting(patch) {
   const keep = S.book && !S.book.loading ? getPos() : null;
@@ -914,10 +1795,23 @@ function applyRemoteSettings() {
   ensureFont(S.set.font).then(() => { applySettings(); if (keep) goTo(keep.i, keep.f); });
 }
 $('#fontChips').innerHTML = FONTS.map(f => `<button data-font="${f.id}">${f.name}</button>`).join('');
-$('#themeSw').innerHTML = THEMES.map(t =>
-  `<button data-bg="${t.bg}" data-fg="${t.fg}" style="background:${t.bg};color:${t.fg}" aria-label="${t.name}">가</button>`).join('');
-$('#fontChips').onclick = e => { const b = e.target.closest('button'); if (b) changeSetting({ font: b.dataset.font }); };
-$('#themeSw').onclick = e => { const b = e.target.closest('button'); if (b) changeSetting({ bg: b.dataset.bg, fg: b.dataset.fg }); };
+$('#themeSw').innerHTML = THEMES.map(t => `<button data-bg="${t.bg}" data-fg="${t.fg}" style="background:${t.bg};color:${t.fg}" aria-label="${t.name}">가</button>`).join('');
+const chip = (sel, fn) => { $(sel).onclick = e => { const b = e.target.closest('button'); if (b) fn(b); }; };
+chip('#fontChips', b => changeSetting({ font: b.dataset.font }));
+chip('#themeSw', b => changeSetting({ bg: b.dataset.bg, fg: b.dataset.fg }));
+chip('#modeChips', b => changeSetting({ mode: b.dataset.mode }));
+chip('#axisChips', b => changeSetting({ axis: b.dataset.axis }));
+chip('#darkChips', b => changeSetting({ dark: b.dataset.dark }));
+chip('#pdfChips', async b => {
+  const B = S.book; if (!B || B.kind !== 'pdf' || B.loading) return;
+  const want = b.dataset.pdf; if ((want === 'text') === isFlow()) return;
+  const pos = getPos(), pg = curPg(pos.i);
+  closeSheets();
+  await setPdfView(want, pg);
+  const rec = S.prog.files[B.id] || { name: B.name };
+  S.prog.files[B.id] = Object.assign({}, rec, { pdfMode: want, pm: curPm(), i: getPos().i, f: 0, pg, t: Date.now(), del: undefined });
+  LS.set('prog', S.prog); markDirty(); pushSoon();
+});
 $('#styleSheet').addEventListener('click', e => {
   const b = e.target.closest('button[data-k]'); if (!b) return;
   const k = b.dataset.k, [lo, hi] = LIM[k];
@@ -928,7 +1822,11 @@ $('#styleSheet').addEventListener('click', e => {
 $('#bgPick').onchange = e => changeSetting({ bg: e.target.value.toUpperCase() });
 $('#fgPick').onchange = e => changeSetting({ fg: e.target.value.toUpperCase() });
 $('#tapToggle').onchange = e => changeSetting({ tap: e.target.checked });
-$('#modeChips').onclick = e => { const b = e.target.closest('button'); if (b) changeSetting({ mode: b.dataset.mode }); };
+$('#spreadToggle').onchange = e => changeSetting({ spread: e.target.checked });
+$('#darkFrom').onchange = e => changeSetting({ darkFrom: e.target.value || '19:00' });
+$('#darkTo').onchange = e => changeSetting({ darkTo: e.target.value || '07:00' });
+setInterval(() => { if (nightOn() !== lastNight) applySettings(); }, 30000);
+try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (S.set.dark === 'system') applySettings(); }); } catch {}
 let resizeTimer = 0;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
@@ -939,24 +1837,24 @@ window.addEventListener('resize', () => {
 });
 
 /* ---------- 시트 ---------- */
-function openSheet(n) { $('#' + n + 'Scrim').hidden = false; $('#' + n + 'Sheet').hidden = false; }
-function closeSheets() { for (const n of ['style', 'acc']) { $('#' + n + 'Scrim').hidden = true; $('#' + n + 'Sheet').hidden = true; } }
+const SHEETS = ['style', 'acc', 'panel', 'find', 'note', 'up', 'item'];
+function openSheet(n) { closeSheets(); hideSelBar(); $('#' + n + 'Scrim').hidden = false; $('#' + n + 'Sheet').hidden = false; }
+function closeSheets() { for (const n of SHEETS) { $('#' + n + 'Scrim').hidden = true; $('#' + n + 'Sheet').hidden = true; } }
+const openSheets = () => SHEETS.filter(n => !$('#' + n + 'Sheet').hidden);
+for (const n of SHEETS) $('#' + n + 'Scrim').onclick = closeSheets;
 $('#styleBtn').onclick = () => openSheet('style');
-$('#styleScrim').onclick = closeSheets;
-$('#accScrim').onclick = closeSheets;
 $('#accountBtn').onclick = () => {
-  const n = Object.keys(S.prog.files || {}).length;
-  $('#accInfo').textContent = `저장소 ${S.repo}의 ${PROG_PATH} 파일에 읽던 위치 ${n}건과 보기 설정을 저장합니다. ` +
+  const n = Object.values(S.prog.files || {}).filter(r => !r.del).length;
+  $('#accInfo').textContent = `저장소 ${S.repo}의 ${PROG_PATH} 파일에 읽던 위치 ${n}건, 북마크·하이라이트·메모, 보기 설정을 저장합니다. ` +
     (syncState.s === 'fail' ? '마지막 저장 실패: ' + syncState.msg : '');
-  renderCache();
-  openSheet('acc');
+  renderCache(); openSheet('acc');
 };
 function renderCache() {
   const items = Object.entries(S.cache).filter(([k]) => k.startsWith(S.repo + ':')).sort((a, b) => b[1].at - a[1].at);
   const total = items.reduce((a, [, c]) => a + (c.size || 0), 0);
   $('#cacheInfo').textContent = items.length
-    ? `${items.length}개, ${fmtSize(total)}. 한 번 받은 소설은 다음부터 내려받지 않고 바로 엽니다. 저장소에서 파일이 바뀌면 다시 받습니다.`
-    : '아직 보관한 소설이 없습니다. 소설을 열면 자동으로 보관됩니다.';
+    ? `${items.length}개, ${fmtSize(total)}. 한 번 받은 책은 다음부터 내려받지 않고 바로 엽니다. 저장소에서 파일이 바뀌면 다시 받습니다.`
+    : '아직 보관한 책이 없습니다. 책을 열면 자동으로 보관됩니다.';
   $('#cacheList').innerHTML = items.map(([k, c]) =>
     `<div class="cache-row"><span class="n">${esc(c.name)}</span><span class="s">${fmtSize(c.size || 0)}</span><button data-drop="${esc(k)}">삭제</button></div>`).join('');
   $('#cacheClearBtn').hidden = !items.length;
@@ -966,7 +1864,7 @@ $('#cacheList').onclick = async e => {
   await dropBook(b.dataset.drop); renderCache(); if (!$('#library').hidden) loadFolder();
 };
 $('#cacheClearBtn').onclick = async () => {
-  if (!confirm('기기에 보관한 소설을 모두 삭제합니다. 저장소의 원본과 읽기 기록은 그대로입니다.')) return;
+  if (!confirm('기기에 보관한 책을 모두 삭제합니다. 저장소의 원본과 읽기 기록은 그대로입니다.')) return;
   try { await IDB.clear(); } catch {}
   S.cache = {}; LS.set('cache', S.cache); renderCache(); if (!$('#library').hidden) loadFolder();
 };
@@ -977,14 +1875,31 @@ $('#syncNowBtn').onclick = async () => {
   finally { $('#syncNowBtn').disabled = false; closeSheets(); }
 };
 $('#logoutBtn').onclick = async () => {
-  if (!confirm('이 기기에서 연결을 해제합니다. 기기에 보관한 소설도 삭제됩니다. 저장소의 원본과 읽기 기록은 남습니다.')) return;
+  if (!confirm('이 기기에서 연결을 해제합니다. 기기에 보관한 책도 삭제됩니다. 저장소의 원본과 읽기 기록은 남습니다.')) return;
   await pushProg();
   try { await IDB.clear(); } catch {}
   S.cache = {};
-  for (const k of ['token', 'prog', 'dirty', 'nav', 'cache']) LS.del(k);
-  S.token = ''; S.prog = { v: 1, files: {} }; S.dirty = false; S.pulled = false; S.progSha = null;
-  S.nav = [{ id: '', name: '소설' }];
+  for (const k of ['token', 'prog', 'dirty', 'nav', 'cache', 'branch']) LS.del(k);
+  S.token = ''; S.branch = ''; S.prog = { v: 1, files: {}, notes: {} }; S.dirty = false; S.pulled = false; S.progSha = null;
+  S.nav = [{ id: '', name: '저장소' }];
   showSetup('');
+};
+$('#syncBtn').onclick = async () => {
+  const btn = $('#syncBtn');
+  if (!S.book || S.book.loading || btn.classList.contains('busy')) return;
+  btn.classList.add('busy');
+  const book = S.book; recordPos();
+  const mine = S.prog.files[book.id];
+  try {
+    await pushProg(); await pullProg(); markDirty(); await pushProg();
+    if (syncState.s === 'fail') throw new Error(syncState.msg);
+    const r = S.prog.files[book.id], cur = getPos();
+    if (book === S.book && r && !r.del && cur && r !== mine && (r.t || 0) > ((mine && mine.t) || 0) && Math.abs(startPos(r).i - cur.i) > 2)
+      toast('다른 기기에서 ' + (r.pct || 0).toFixed(1) + '%까지 읽었습니다.', '이동', () => { const sp = startPos(r); goTo(sp.i, sp.f); S.book.moved = true; recordPos(); });
+    else toast('동기화했습니다.');
+  } catch (e) {
+    if (!onAuthFail(e)) toast(e instanceof ApiErr ? errMsg(e) : '동기화 실패: ' + e.message);
+  } finally { btn.classList.remove('busy'); }
 };
 
 /* ---------- 토스트 ---------- */
@@ -994,33 +1909,39 @@ function toast(text, actionLabel, action) {
   t.innerHTML = '<span></span>' + (actionLabel ? '<button></button>' : '');
   t.firstChild.textContent = text;
   if (actionLabel) { t.lastChild.textContent = actionLabel; t.lastChild.onclick = () => { t.hidden = true; action(); }; }
-  t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 8000);
+  t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 6000);
 }
 
 /* ---------- 앱 전환 시 저장·불러오기 ---------- */
 document.addEventListener('visibilitychange', async () => {
-  if (document.visibilityState === 'hidden') {
-    if (S.book && !S.book.loading) recordPos();
-    pushProg();
-    return;
-  }
+  if (document.visibilityState === 'hidden') { if (S.book && !S.book.loading) recordPos(); pushProg(); return; }
   if (!S.token || Date.now() - S.lastPull < 30000) return;
-  const book = S.book;
-  const mine = book && S.prog.files[book.id];
+  const book = S.book, mine = book && S.prog.files[book.id];
   try { await pullProg(); } catch (e) { onAuthFail(e); return; }
   if (!$('#library').hidden) renderRecent();
   if (!book || book !== S.book || book.loading) return;
-  const r = S.prog.files[book.id];
-  const cur = getPos();
-  if (r && cur && r !== mine && r.t > ((mine && mine.t) || 0) && Math.abs(r.i - cur.i) > 2)
-    toast('다른 기기에서 ' + r.pct.toFixed(1) + '%까지 읽었습니다.', '이동', () => { goTo(r.i, r.f); S.book.moved = true; recordPos(); });
+  const r = S.prog.files[book.id], cur = getPos();
+  if (r && !r.del && cur && r !== mine && r.t > ((mine && mine.t) || 0) && Math.abs(startPos(r).i - cur.i) > 2)
+    toast('다른 기기에서 ' + (r.pct || 0).toFixed(1) + '%까지 읽었습니다.', '이동', () => { const sp = startPos(r); goTo(sp.i, sp.f); S.book.moved = true; recordPos(); });
 });
 window.addEventListener('pagehide', () => { if (S.book && !S.book.loading) recordPos(); pushProg(); });
 
 /* ---------- 시작 ---------- */
 applySettings();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
-if (S.token && S.repo) openLibrary(); else showSetup('');
+window.addEventListener('hashchange', () => {
+  if (location.hash !== '#upload') return;
+  history.replaceState(null, '', location.pathname + location.search);
+  if (S.token && S.repo) { if ($('#library').hidden) { if (S.book) closeBook(); else openLibrary(); } openUpload(); }
+});
+(async () => {
+  const hash = location.hash;
+  if (hash === '#upload' || hash === '#shared') history.replaceState(null, '', location.pathname + location.search);
+  if (!(S.token && S.repo)) { showSetup(hash === '#shared' ? '파일을 올리려면 먼저 연결하세요.' : ''); return; }
+  openLibrary();
+  if (hash === '#upload') openUpload();
+  else if (hash === '#shared') { const files = await takeShared(); openUpload(files); }
+})();
 </script>
 </body>
 </html>
