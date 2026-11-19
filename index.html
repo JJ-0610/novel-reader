@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>소설뷰어</title>
+<meta name="theme-color" content="#FAFAF7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="소설뷰어">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&display=swap" id="font-NotoSerifKR">
+<style>
+:root{
+  --paper:#FAFAF7; --ink:#1D2230; --mute:#6B7080; --line:#E2E3DE; --card:#FFFFFF;
+  --accent:#2C4278; --accent-ink:#FFFFFF; --warn:#B3261E;
+  --ui:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --serif:"Noto Serif KR","AppleMyungjo",serif;
+  --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
+  --sal:env(safe-area-inset-left,0px); --sar:env(safe-area-inset-right,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{ --paper:#111318; --ink:#E6E7EA; --mute:#9095A3; --line:#262A33; --card:#181B22;
+         --accent:#9DB1E8; --accent-ink:#0F1424; --warn:#F2B8B5; color-scheme:dark; }
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--ui);font-size:16px;
+  -webkit-text-size-adjust:100%;word-break:keep-all;overflow-wrap:anywhere}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+.screen{position:fixed;inset:0;display:flex;flex-direction:column}
+
+/* 공통 버튼 */
+.btn{border:0;border-radius:10px;padding:13px 18px;background:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn:disabled{opacity:.5}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--line)}
+.icon-btn{width:44px;height:44px;border:0;background:transparent;border-radius:10px;display:grid;place-items:center;flex:none}
+.icon-btn svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.msg{margin:12px 0 0;font-size:14px;line-height:1.6}
+.msg.err{color:var(--warn)}
+
+/* 연결 화면 */
+#setup{overflow-y:auto;padding:calc(var(--sat) + 40px) calc(var(--sar) + 24px) calc(var(--sab) + 32px) calc(var(--sal) + 24px)}
+#setup .wrap{max-width:440px;margin:0 auto;width:100%}
+#setup h1{font-family:var(--serif);font-weight:600;font-size:30px;margin:0 0 8px;letter-spacing:-.01em}
+#setup p.lead{color:var(--mute);margin:0 0 28px;line-height:1.6}
+#setup ol{padding-left:20px;margin:0 0 24px;line-height:1.75;font-size:15px}
+#setup label{display:block;font-size:14px;color:var(--mute);margin-bottom:6px}
+#setup input{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card);margin-bottom:14px}
+#setup .btn{width:100%}
+#setup .note{font-size:13px;color:var(--mute);margin-top:16px;line-height:1.6}
+
+/* 서재 */
+#library .top{padding:calc(var(--sat) + 14px) calc(var(--sar) + 12px) 6px calc(var(--sal) + 20px);display:flex;align-items:center;gap:8px}
+#library h1{font-family:var(--serif);font-weight:600;font-size:28px;margin:0;flex:1;letter-spacing:-.01em}
+#library .body{flex:1;overflow-y:auto;padding:0 calc(var(--sar) + 20px) calc(var(--sab) + 28px) calc(var(--sal) + 20px)}
+#library .inner{max-width:720px;margin:0 auto}
+.sec-title{font-size:13px;color:var(--mute);margin:22px 0 4px;font-weight:600}
+.row{display:flex;align-items:center;gap:14px;width:100%;text-align:left;border:0;background:transparent;
+  padding:14px 2px;border-bottom:1px solid var(--line);min-height:56px}
+.row .ic{width:22px;height:22px;flex:none;stroke:var(--mute);fill:none;stroke-width:1.6;stroke-linejoin:round}
+.row .main{flex:1;min-width:0}
+.row .name{display:block;font-size:16px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .sub{display:block;font-size:13px;color:var(--mute);margin-top:3px;font-variant-numeric:tabular-nums}
+.row .bar{display:block;height:3px;background:var(--line);border-radius:2px;margin-top:8px;overflow:hidden}
+.row .bar i{display:block;height:100%;background:var(--accent)}
+.row .pct{font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums;flex:none}
+.crumbs{display:flex;flex-wrap:wrap;gap:2px;align-items:center;font-size:14px;margin:4px 0 2px}
+.crumbs button{border:0;background:transparent;color:var(--accent);padding:6px 4px;border-radius:6px}
+.crumbs span{color:var(--mute)}
+.crumbs button:last-child{color:var(--ink);font-weight:600}
+.empty{color:var(--mute);font-size:14px;padding:22px 2px;line-height:1.6}
+.sync{font-size:12px;color:var(--mute);margin-top:22px}
+
+/* 리더 */
+#reader{--rbg:#FFFFFF;--rfg:#1F1F1F;--rfont:var(--serif);--rsize:19px;--rlh:1.8;--rmargin:22px;
+  background:var(--rbg);color:var(--rfg)}
+#page{flex:1;overflow-y:auto;overflow-anchor:none;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+#text{max-width:44em;margin:0 auto;font-family:var(--rfont);font-size:var(--rsize);line-height:var(--rlh);
+  padding:calc(var(--sat) + 28px) calc(var(--sar) + var(--rmargin)) calc(var(--sab) + 40vh) calc(var(--sal) + var(--rmargin));
+  word-break:keep-all;overflow-wrap:anywhere}
+#text p{margin:0;padding:0 0 .35em;white-space:pre-wrap}
+#text p.blank{height:.6em;padding:0}
+#loading{position:absolute;inset:0;display:grid;place-items:center;font-size:15px;opacity:.7;pointer-events:none;padding:24px;text-align:center}
+.chrome{position:absolute;left:0;right:0;z-index:5;background:color-mix(in srgb,var(--rbg) 92%,transparent);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);transition:transform .2s ease,opacity .2s ease}
+#rtop{top:0;padding:calc(var(--sat) + 4px) calc(var(--sar) + 6px) 6px calc(var(--sal) + 6px);display:flex;align-items:center;gap:4px;
+  border-bottom:1px solid color-mix(in srgb,var(--rfg) 12%,transparent)}
+#rtop .t{flex:1;min-width:0;font-size:15px;font-family:var(--ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#rbot{bottom:0;padding:10px calc(var(--sar) + 18px) calc(var(--sab) + 12px) calc(var(--sal) + 18px);font-family:var(--ui);
+  border-top:1px solid color-mix(in srgb,var(--rfg) 12%,transparent)}
+#rbot .line{display:flex;align-items:center;gap:12px}
+#rbot input[type=range]{flex:1;accent-color:var(--rfg)}
+#rbot .pct{font-size:14px;font-variant-numeric:tabular-nums;min-width:52px;text-align:right}
+#rbot .st{font-size:12px;opacity:.65;margin-top:4px}
+#reader.hide-chrome #rtop{transform:translateY(-100%);opacity:0;pointer-events:none}
+#reader.hide-chrome #rbot{transform:translateY(100%);opacity:0;pointer-events:none}
+
+/* 시트 */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:20}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;background:var(--card);color:var(--ink);font-family:var(--ui);
+  border-radius:16px 16px 0 0;max-height:82vh;overflow-y:auto;
+  padding:8px calc(var(--sar) + 20px) calc(var(--sab) + 22px) calc(var(--sal) + 20px);max-width:640px;margin:0 auto}
+.sheet .grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:4px auto 10px}
+.sheet h2{font-size:17px;margin:4px 0 6px}
+.field{padding:12px 0;border-bottom:1px solid var(--line)}
+.field:last-child{border-bottom:0}
+.field > .lbl{font-size:13px;color:var(--mute);margin-bottom:8px;display:block}
+.step{display:flex;align-items:center;gap:10px}
+.step button{width:44px;height:40px;border:1px solid var(--line);border-radius:10px;background:transparent;font-size:18px}
+.step output{min-width:56px;text-align:center;font-variant-numeric:tabular-nums}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:8px 14px;font-size:14px}
+.chips button[aria-pressed=true]{border-color:var(--accent);color:var(--accent);font-weight:600;box-shadow:inset 0 0 0 1px var(--accent)}
+.swatches{display:flex;flex-wrap:wrap;gap:10px}
+.swatches button{width:52px;height:52px;border-radius:12px;border:1px solid var(--line);font-family:var(--serif);font-size:18px;display:grid;place-items:center;padding:0}
+.swatches button[aria-pressed=true]{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--accent)}
+.swatches small{display:block;font-family:var(--ui);font-size:10px;margin-top:-6px}
+.colors{display:flex;gap:18px;margin-top:12px;font-size:14px}
+.colors label{display:flex;align-items:center;gap:8px}
+.colors input{width:40px;height:32px;border:1px solid var(--line);border-radius:8px;padding:0;background:transparent}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:15px}
+.toggle input{width:22px;height:22px;accent-color:var(--accent)}
+.sheet .actions{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.sheet .info{font-size:14px;color:var(--mute);line-height:1.6}
+
+/* 토스트 */
+#toast{position:fixed;left:50%;bottom:calc(var(--sab) + 90px);transform:translateX(-50%);z-index:30;
+  background:#1D2230;color:#fff;border-radius:12px;padding:12px 14px;font-family:var(--ui);font-size:14px;
+  display:flex;gap:12px;align-items:center;max-width:calc(100vw - 32px);box-shadow:0 6px 24px rgba(0,0,0,.25)}
+#toast button{border:0;background:transparent;color:#B9C8F2;font-weight:600;padding:4px 6px}
+@media (prefers-reduced-motion:reduce){ .chrome{transition:none} }
+</style>
+</head>
+<body>
+
+<!-- 연결 -->
+<section id="setup" class="screen" hidden>
+  <div class="wrap">
+    <h1>MYBOX 연결</h1>
+    <p class="lead">MYBOX에 있는 txt 소설을 읽고, 읽던 위치를 MYBOX에 저장해 어느 기기에서든 이어 읽습니다.</p>
+    <ol>
+      <li>브라우저에서 MYBOX 웹에 로그인</li>
+      <li>설정 → 계정 및 개인 액세스 토큰 관리 → 토큰 생성</li>
+      <li>이름과 유효기간을 정하고, 표시된 토큰을 복사 (한 번만 보입니다)</li>
+      <li>아래 칸에 붙여넣기</li>
+    </ol>
+    <label for="tokenInput">개인 액세스 토큰</label>
+    <input id="tokenInput" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="토큰 붙여넣기">
+    <button class="btn" id="connectBtn">연결하기</button>
+    <p class="msg" id="setupMsg" role="status"></p>
+    <p class="note">토큰은 이 기기에만 저장됩니다. 토큰이 있으면 MYBOX 전체에 접근할 수 있으니 다른 사람과 공유하지 마세요.</p>
+  </div>
+</section>
+
+<!-- 서재 -->
+<section id="library" class="screen" hidden>
+  <div class="top">
+    <h1>서재</h1>
+    <button class="icon-btn" id="refreshBtn" aria-label="새로고침"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 5v6h-6"/></svg></button>
+    <button class="icon-btn" id="accountBtn" aria-label="계정과 동기화"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  </div>
+  <div class="body"><div class="inner">
+    <div id="recentWrap" hidden>
+      <div class="sec-title">이어 읽기</div>
+      <div id="recentList"></div>
+    </div>
+    <div class="sec-title">폴더</div>
+    <nav class="crumbs" id="crumbs" aria-label="폴더 경로"></nav>
+    <div id="folderList"></div>
+    <p class="sync" id="libSync"></p>
+  </div></div>
+</section>
+
+<!-- 리더 -->
+<section id="reader" class="screen hide-chrome" hidden>
+  <div id="page" tabindex="0"><div id="text"></div></div>
+  <div id="loading" hidden></div>
+  <header id="rtop" class="chrome">
+    <button class="icon-btn" id="backBtn" aria-label="서재로"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="t" id="bookTitle"></div>
+    <button class="icon-btn" id="styleBtn" aria-label="보기 설정"><svg viewBox="0 0 24 24"><path d="M3 19l5-14 5 14"/><path d="M5 14h6"/><path d="M15 19l3.5-9 3.5 9"/><path d="M16.3 16h4.4"/></svg></button>
+  </header>
+  <footer id="rbot" class="chrome">
+    <div class="line">
+      <input type="range" id="seek" min="0" max="1000" step="1" value="0" aria-label="읽은 위치">
+      <span class="pct" id="pct">0.0%</span>
+    </div>
+    <div class="st" id="readSync"></div>
+  </footer>
+</section>
+
+<!-- 보기 설정 시트 -->
+<div class="scrim" id="styleScrim" hidden></div>
+<div class="sheet" id="styleSheet" role="dialog" aria-label="보기 설정" hidden>
+  <div class="grab"></div>
+  <div class="field"><span class="lbl">글꼴</span><div class="chips" id="fontChips"></div></div>
+  <div class="field"><span class="lbl">글자 크기</span>
+    <div class="step"><button data-k="size" data-d="-1" aria-label="작게">−</button><output id="o-size"></output><button data-k="size" data-d="1" aria-label="크게">+</button></div></div>
+  <div class="field"><span class="lbl">줄 간격</span>
+    <div class="step"><button data-k="lh" data-d="-0.1" aria-label="좁게">−</button><output id="o-lh"></output><button data-k="lh" data-d="0.1" aria-label="넓게">+</button></div></div>
+  <div class="field"><span class="lbl">좌우 여백</span>
+    <div class="step"><button data-k="margin" data-d="-4" aria-label="좁게">−</button><output id="o-margin"></output><button data-k="margin" data-d="4" aria-label="넓게">+</button></div></div>
+  <div class="field"><span class="lbl">바탕과 글자색</span>
+    <div class="swatches" id="themeSw"></div>
+    <div class="colors">
+      <label>바탕 <input type="color" id="bgPick"></label>
+      <label>글자 <input type="color" id="fgPick"></label>
+    </div>
+  </div>
+  <div class="field"><label class="toggle">화면 왼쪽·오른쪽을 눌러 한 화면씩 넘기기 <input type="checkbox" id="tapToggle"></label></div>
+</div>
+
+<!-- 계정 시트 -->
+<div class="scrim" id="accScrim" hidden></div>
+<div class="sheet" id="accSheet" role="dialog" aria-label="계정과 동기화" hidden>
+  <div class="grab"></div>
+  <h2>계정과 동기화</h2>
+  <p class="info" id="accInfo"></p>
+  <div class="actions">
+    <button class="btn" id="syncNowBtn">읽기 기록 지금 동기화</button>
+    <button class="btn ghost" id="changeTokenBtn">토큰 바꾸기</button>
+    <button class="btn ghost" id="logoutBtn">이 기기에서 연결 해제</button>
+  </div>
+</div>
+
+<div id="toast" hidden></div>
+
+<script>
+'use strict';
+const API = 'https://open-api.mybox.naver.com';
+const PROG_NAME = '소설뷰어_읽기기록.json';
+const CH = 300;                // 한 번에 그리는 줄 묶음
+const PUSH_EVERY = 90 * 1000;  // 읽는 중 자동 저장 간격
+const $ = s => document.querySelector(s);
+
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem('nr.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('nr.' + k, JSON.stringify(v)); } catch {} },
+  del(k) { try { localStorage.removeItem('nr.' + k); } catch {} }
+};
+
+const FONTS = [
+  { id: 'system', name: '기본', stack: 'system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif' },
+  { id: 'NotoSerifKR', name: '본명조', g: 'Noto+Serif+KR', fam: 'Noto Serif KR', stack: '"Noto Serif KR","AppleMyungjo",serif' },
+  { id: 'NanumMyeongjo', name: '나눔명조', g: 'Nanum+Myeongjo', fam: 'Nanum Myeongjo', stack: '"Nanum Myeongjo",serif' },
+  { id: 'GowunBatang', name: '고운바탕', g: 'Gowun+Batang', fam: 'Gowun Batang', stack: '"Gowun Batang",serif' },
+  { id: 'Hahmlet', name: '함렛', g: 'Hahmlet', fam: 'Hahmlet', stack: '"Hahmlet",serif' },
+  { id: 'NotoSansKR', name: '본고딕', g: 'Noto+Sans+KR', fam: 'Noto Sans KR', stack: '"Noto Sans KR",sans-serif' },
+  { id: 'NanumGothic', name: '나눔고딕', g: 'Nanum+Gothic', fam: 'Nanum Gothic', stack: '"Nanum Gothic",sans-serif' }
+];
+const THEMES = [
+  { name: '흰 종이', bg: '#FFFFFF', fg: '#1F1F1F' },
+  { name: '미색', bg: '#F4EEDC', fg: '#3A3226' },
+  { name: '회색', bg: '#E6E7E3', fg: '#25272A' },
+  { name: '연두', bg: '#DDE8D8', fg: '#1F2E1C' },
+  { name: '밤', bg: '#16191E', fg: '#B8BCB4' },
+  { name: '먹', bg: '#000000', fg: '#8F8F8F' }
+];
+const DEF = { font: 'NotoSerifKR', size: 19, lh: 1.8, margin: 22, bg: '#FFFFFF', fg: '#1F1F1F', tap: true, t: 0 };
+const LIM = { size: [12, 36], lh: [1.3, 2.6], margin: [8, 48] };
+
+const S = {
+  token: LS.get('token', ''),
+  set: Object.assign({}, DEF, LS.get('settings', {})),
+  prog: LS.get('prog', { v: 1, files: {} }),
+  progId: LS.get('progId', null),
+  nav: LS.get('nav', [{ id: null, name: 'MYBOX' }]),
+  dirty: LS.get('dirty', false), pulled: false, lastPull: 0,
+  book: null, first: 0, last: -1, openSeq: 0
+};
+
+/* ---------- MYBOX API ---------- */
+class ApiErr extends Error { constructor(kind, status, msg) { super(msg); this.kind = kind; this.status = status; } }
+
+async function call(method, path, opt = {}) {
+  const u = new URL(API + path);
+  if (opt.query) for (const [k, v] of Object.entries(opt.query)) if (v != null && v !== '') u.searchParams.set(k, v);
+  const h = { Authorization: 'Bearer ' + S.token, Accept: 'application/json' };
+  if (opt.body) h['Content-Type'] = 'application/json';
+  let r;
+  try { r = await fetch(u, { method, headers: h, body: opt.body ? JSON.stringify(opt.body) : undefined }); }
+  catch { throw new ApiErr('network', 0, 'network'); }
+  const txt = await r.text();
+  let data = null; try { data = txt ? JSON.parse(txt) : null; } catch {}
+  if (!r.ok) throw new ApiErr('http', r.status, (data && (data.message || data.errorMessage)) || txt.slice(0, 200));
+  return data;
+}
+
+async function listAll(folderId) {
+  const path = folderId ? '/v1/drive/folders/' + encodeURIComponent(folderId) + '/resources' : '/v1/drive/resources';
+  let out = [], cursor = null, n = 0;
+  do {
+    const d = await call('GET', path, { query: { count: 1000, sort: 'name,asc', cursor } });
+    out = out.concat((d && d.resources) || []);
+    cursor = d && d.responseMetaData && d.responseMetaData.nextCursor;
+  } while (cursor && ++n < 20);
+  return out;
+}
+
+async function downloadBuf(fileId) {
+  const t = await call('GET', '/v1/drive/files/' + encodeURIComponent(fileId) + '/download');
+  let r;
+  try { r = await fetch(t.downloadUrl); } catch { throw new ApiErr('network', 0, 'download'); }
+  if (!r.ok) throw new ApiErr('http', r.status, 'download');
+  return r.arrayBuffer();
+}
+
+async function uploadText(name, text) {
+  const blob = new Blob([text], { type: 'application/octet-stream' });
+  const t = await call('POST', '/v1/drive/files', { body: { fileName: name, fileSize: blob.size, isOverwrite: true } });
+  const fd = new FormData();
+  fd.append('Filedata', blob, name);
+  let r;
+  try { r = await fetch(t.uploadUrl, { method: 'POST', body: fd }); } catch { throw new ApiErr('network', 0, 'upload'); }
+  if (!r.ok) throw new ApiErr('http', r.status, 'upload');
+  try { return await r.json(); } catch { return {}; }
+}
+
+function errMsg(e) {
+  if (!(e instanceof ApiErr)) return '오류가 발생했습니다: ' + (e && e.message || e);
+  if (e.kind === 'network') return navigator.onLine === false
+    ? '인터넷에 연결되어 있지 않습니다.'
+    : 'MYBOX에 접속하지 못했습니다. 계속 실패하면 MYBOX가 브라우저의 직접 접속을 막고 있는 것입니다.';
+  if (e.status === 401) return '토큰이 맞지 않거나 만료되었습니다. 토큰을 다시 입력하세요.';
+  if (e.status === 403) return '이 파일에 접근할 권한이 없습니다.';
+  if (e.status === 404) return '파일을 찾을 수 없습니다. 이동되었거나 삭제되었을 수 있습니다.';
+  if (e.status === 429) return 'MYBOX 사용 한도를 넘었습니다. 잠시 후 다시 시도하세요. (다운로드는 하루 한도가 있습니다)';
+  if (e.status === 507) return 'MYBOX 저장 공간이 가득 찼습니다.';
+  return 'MYBOX 오류 (' + e.status + ')' + (e.message ? ': ' + e.message : '');
+}
+function onAuthFail(e) {
+  if (e instanceof ApiErr && e.status === 401) { showSetup(errMsg(e)); return true; }
+  return false;
+}
+
+/* ---------- 텍스트 ---------- */
+function decodeText(buf) {
+  const b = new Uint8Array(buf);
+  if (b[0] === 0xFF && b[1] === 0xFE) return new TextDecoder('utf-16le').decode(b.subarray(2));
+  if (b[0] === 0xFE && b[1] === 0xFF) return new TextDecoder('utf-16be').decode(b.subarray(2));
+  try { return new TextDecoder('utf-8', { fatal: true }).decode(b).replace(/^\uFEFF/, ''); }
+  catch { return new TextDecoder('euc-kr').decode(b); }
+}
+
+/* ---------- 읽기 기록 동기화 ---------- */
+function mergeProg(a, b) {
+  const out = { v: 1, files: Object.assign({}, (a && a.files) || {}), settings: (a && a.settings) || null };
+  for (const [id, r] of Object.entries((b && b.files) || {}))
+    if (!out.files[id] || (r.t || 0) > (out.files[id].t || 0)) out.files[id] = r;
+  if (b && b.settings && (!out.settings || (b.settings.t || 0) > (out.settings.t || 0))) out.settings = b.settings;
+  return out;
+}
+async function findProgId() {
+  if (S.progId) return S.progId;
+  const root = await listAll(null);
+  const f = root.find(x => x.type === 'file' && x.name === PROG_NAME);
+  if (f) { S.progId = f.resourceId; LS.set('progId', f.resourceId); }
+  return S.progId;
+}
+async function pullProg() {
+  let id = await findProgId();
+  if (id) {
+    let buf;
+    try { buf = await downloadBuf(id); }
+    catch (e) {
+      if (e.status !== 404) throw e;
+      S.progId = null; LS.del('progId');
+      id = await findProgId();
+      if (id) buf = await downloadBuf(id);
+    }
+    if (buf) {
+      try {
+        const remote = JSON.parse(new TextDecoder().decode(buf));
+        S.prog = mergeProg(S.prog, remote); LS.set('prog', S.prog);
+        applyRemoteSettings();
+      } catch {}
+    }
+  }
+  S.pulled = true; S.lastPull = Date.now();
+  setSync('ok');
+}
+let pushing = null;
+function pushProg() {
+  if (!S.dirty || !S.token) return Promise.resolve();
+  if (pushing) return pushing;
+  pushing = (async () => {
+    try {
+      if (!S.pulled) await pullProg();   // 다른 기기 기록을 덮어쓰지 않도록 먼저 받아서 합침
+      S.dirty = false; LS.set('dirty', false);
+      setSync('saving');
+      const res = await uploadText(PROG_NAME, JSON.stringify(S.prog));
+      if (res && res.resourceId) { S.progId = res.resourceId; LS.set('progId', res.resourceId); }
+      setSync('ok');
+    } catch (e) {
+      S.dirty = true; LS.set('dirty', true);
+      setSync('fail', errMsg(e));
+      onAuthFail(e);
+    } finally { pushing = null; }
+  })();
+  return pushing;
+}
+function markDirty() { S.dirty = true; LS.set('dirty', true); }
+
+let syncState = { s: '', at: 0, msg: '' };
+function setSync(s, msg) {
+  syncState = { s, at: Date.now(), msg: msg || '' };
+  const time = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+  const txt = s === 'ok' ? '읽기 기록 동기화됨 ' + time
+    : s === 'saving' ? '읽기 기록 저장 중'
+    : s === 'fail' ? '읽기 기록 저장 실패 · ' + msg : '';
+  $('#readSync').textContent = txt;
+  $('#libSync').textContent = txt;
+}
+
+/* ---------- 화면 전환 ---------- */
+function show(id) {
+  for (const s of ['setup', 'library', 'reader']) $('#' + s).hidden = s !== id;
+  document.querySelector('meta[name=theme-color]').content =
+    id === 'reader' ? S.set.bg : getComputedStyle(document.documentElement).getPropertyValue('--paper').trim();
+}
+function showSetup(msg) {
+  closeSheets(); S.book = null;
+  $('#tokenInput').value = '';
+  $('#setupMsg').textContent = msg || '';
+  $('#setupMsg').className = 'msg' + (msg ? ' err' : '');
+  show('setup');
+}
+
+/* ---------- 연결 ---------- */
+$('#connectBtn').onclick = async () => {
+  const tok = $('#tokenInput').value.trim();
+  const msg = $('#setupMsg');
+  if (!tok) { msg.textContent = '토큰을 붙여넣으세요.'; msg.className = 'msg err'; return; }
+  const btn = $('#connectBtn'); btn.disabled = true; msg.className = 'msg'; msg.textContent = '확인하는 중…';
+  const prev = S.token; S.token = tok;
+  try {
+    await call('GET', '/v1/drive/storage');
+    LS.set('token', tok);
+    if (prev && prev !== tok) { S.progId = null; LS.del('progId'); }
+    S.pulled = false;
+    msg.textContent = '';
+    openLibrary();
+  } catch (e) {
+    S.token = prev;
+    msg.className = 'msg err';
+    msg.textContent = e.kind === 'network'
+      ? 'MYBOX 접속이 차단되었습니다(브라우저 직접 접속 불가). 인터넷이 정상인데도 이 메시지가 나오면 이 방식으로는 사용할 수 없습니다.'
+      : errMsg(e);
+  } finally { btn.disabled = false; }
+};
+
+/* ---------- 서재 ---------- */
+const ICON_FOLDER = '<svg class="ic" viewBox="0 0 24 24"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2.2h8.5A1.5 1.5 0 0 1 21 8.7v9.8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/></svg>';
+const ICON_BOOK = '<svg class="ic" viewBox="0 0 24 24"><path d="M6 3.5h9l3.5 3.5v13.5H6z"/><path d="M15 3.5V7h3.5"/><path d="M9 11h6M9 14h6M9 17h4"/></svg>';
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fmtSize = n => n >= 1048576 ? (n / 1048576).toFixed(1) + 'MB' : Math.max(1, Math.round(n / 1024)) + 'KB';
+function fmtAgo(t) {
+  const m = Math.round((Date.now() - t) / 60000);
+  if (m < 1) return '방금';
+  if (m < 60) return m + '분 전';
+  const h = Math.round(m / 60);
+  if (h < 24) return h + '시간 전';
+  return new Date(t).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
+}
+
+function renderRecent() {
+  const items = Object.entries(S.prog.files || {}).sort((a, b) => (b[1].t || 0) - (a[1].t || 0)).slice(0, 6);
+  $('#recentWrap').hidden = !items.length;
+  $('#recentList').innerHTML = items.map(([id, r]) =>
+    `<button class="row" data-open="${esc(id)}" data-name="${esc(r.name)}">${ICON_BOOK}
+      <span class="main"><span class="name">${esc(r.name)}</span>
+      <span class="sub">${(r.pct || 0).toFixed(1)}% · ${fmtAgo(r.t)}</span>
+      <span class="bar"><i style="width:${Math.min(100, r.pct || 0)}%"></i></span></span></button>`).join('');
+}
+function renderCrumbs() {
+  $('#crumbs').innerHTML = S.nav.map((n, i) =>
+    (i ? '<span>/</span>' : '') + `<button data-crumb="${i}">${esc(n.name)}</button>`).join('');
+}
+let listSeq = 0;
+async function loadFolder() {
+  renderCrumbs();
+  const seq = ++listSeq, box = $('#folderList'), cur = S.nav[S.nav.length - 1];
+  box.innerHTML = '<p class="empty">불러오는 중…</p>';
+  try {
+    const items = await listAll(cur.id);
+    if (seq !== listSeq) return;
+    const folders = items.filter(x => x.type === 'folder');
+    const books = items.filter(x => x.type === 'file' && /\.txt$/i.test(x.name));
+    if (!folders.length && !books.length) { box.innerHTML = '<p class="empty">이 폴더에 txt 파일이나 하위 폴더가 없습니다.</p>'; return; }
+    box.innerHTML = folders.map(f =>
+      `<button class="row" data-folder="${esc(f.resourceId)}" data-name="${esc(f.name)}">${ICON_FOLDER}
+        <span class="main"><span class="name">${esc(f.name)}</span></span></button>`).join('') +
+      books.map(f => {
+        const r = S.prog.files[f.resourceId];
+        return `<button class="row" data-open="${esc(f.resourceId)}" data-name="${esc(f.name)}">${ICON_BOOK}
+          <span class="main"><span class="name">${esc(f.name)}</span><span class="sub">${fmtSize(f.size || 0)}</span></span>
+          ${r ? `<span class="pct">${(r.pct || 0).toFixed(1)}%</span>` : ''}</button>`;
+      }).join('');
+  } catch (e) {
+    if (seq !== listSeq) return;
+    if (onAuthFail(e)) return;
+    if (e.status === 404 && S.nav.length > 1) { S.nav = [S.nav[0]]; LS.set('nav', S.nav); return loadFolder(); }
+    box.innerHTML = `<p class="empty">${esc(errMsg(e))}</p><button class="btn ghost" data-retry>다시 시도</button>`;
+  }
+}
+function openLibrary() {
+  show('library');
+  renderRecent();
+  loadFolder();
+  if (S.token) pullProg().then(renderRecent).catch(e => { if (!onAuthFail(e)) setSync('fail', errMsg(e)); });
+}
+$('#library').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.folder) { S.nav.push({ id: b.dataset.folder, name: b.dataset.name }); LS.set('nav', S.nav); loadFolder(); }
+  else if (b.dataset.crumb != null) { S.nav = S.nav.slice(0, +b.dataset.crumb + 1); LS.set('nav', S.nav); loadFolder(); }
+  else if (b.dataset.open) openBook(b.dataset.open, b.dataset.name);
+  else if (b.hasAttribute('data-retry')) loadFolder();
+});
+$('#refreshBtn').onclick = () => { loadFolder(); pullProg().then(renderRecent).catch(e => setSync('fail', errMsg(e))); };
+
+/* ---------- 리더: 그리기 ---------- */
+const page = $('#page'), textEl = $('#text');
+function chunkEl(k) {
+  const d = document.createElement('div'); d.className = 'chunk';
+  const lines = S.book.lines, end = Math.min((k + 1) * CH, lines.length);
+  const f = document.createDocumentFragment();
+  for (let i = k * CH; i < end; i++) {
+    const p = document.createElement('p'); p.dataset.i = i;
+    const t = lines[i];
+    if (t.trim() === '') p.className = 'blank'; else p.textContent = t;
+    f.appendChild(p);
+  }
+  d.appendChild(f); return d;
+}
+function renderAround(k) {
+  const n = Math.ceil(S.book.lines.length / CH);
+  textEl.textContent = '';
+  S.first = Math.max(0, k - 1); S.last = Math.min(n - 1, k + 1);
+  for (let j = S.first; j <= S.last; j++) textEl.appendChild(chunkEl(j));
+}
+function extendWindow() {
+  if (!S.book) return;
+  const n = Math.ceil(S.book.lines.length / CH), vh = page.clientHeight;
+  if (page.scrollTop + vh > page.scrollHeight - 1.5 * vh && S.last < n - 1) {
+    S.last++; textEl.appendChild(chunkEl(S.last));
+    if (S.last - S.first > 4) { const c = textEl.firstElementChild, h = c.offsetHeight; c.remove(); S.first++; page.scrollTop -= h; }
+  }
+  if (page.scrollTop < 1.5 * vh && S.first > 0) {
+    S.first--; const before = page.scrollHeight;
+    textEl.insertBefore(chunkEl(S.first), textEl.firstElementChild);
+    page.scrollTop += page.scrollHeight - before;
+    if (S.last - S.first > 4) { textEl.lastElementChild.remove(); S.last--; }
+  }
+}
+function getPos() {
+  if (!S.book) return null;
+  const r = page.getBoundingClientRect(), x = r.left + r.width / 2;
+  for (let y = r.top + 2; y < r.top + Math.min(240, r.height); y += 6) {
+    const p = document.elementsFromPoint(x, y).find(el => el.tagName === 'P' && el.dataset.i != null);
+    if (p) {
+      const pr = p.getBoundingClientRect();
+      const f = pr.height ? Math.min(1, Math.max(0, (r.top - pr.top) / pr.height)) : 0;
+      return { i: +p.dataset.i, f };
+    }
+  }
+  const first = textEl.querySelector('p[data-i]');
+  return first ? { i: +first.dataset.i, f: 0 } : { i: 0, f: 0 };
+}
+function goTo(i, f) {
+  const L = S.book.lines.length;
+  i = Math.max(0, Math.min(L - 1, i | 0));
+  renderAround(Math.floor(i / CH));
+  const p = textEl.querySelector('p[data-i="' + i + '"]');
+  page.scrollTop = 0;
+  if (p) page.scrollTop = p.getBoundingClientRect().top - page.getBoundingClientRect().top + (f || 0) * p.offsetHeight;
+  extendWindow();
+  updatePct(pctOf(i));
+}
+const pctOf = i => S.book.lines.length > 1 ? i / (S.book.lines.length - 1) * 100 : 100;
+function updatePct(p) {
+  $('#pct').textContent = p.toFixed(1) + '%';
+  if (!seeking) $('#seek').value = Math.round(p * 10);
+}
+
+/* ---------- 리더: 위치 기록 ---------- */
+let recTimer = 0, pushTimer = 0;
+function recordPos() {
+  if (!S.book || S.book.loading) return;
+  const p = getPos(); if (!p) return;
+  const prev = S.prog.files[S.book.id];
+  if (prev && prev.i === p.i && Math.abs((prev.f || 0) - p.f) < 0.02) return;
+  S.prog.files[S.book.id] = { name: S.book.name, i: p.i, f: +p.f.toFixed(3), pct: +pctOf(p.i).toFixed(1), t: Date.now() };
+  LS.set('prog', S.prog); markDirty();
+}
+page.addEventListener('scroll', () => {
+  if (!S.book || S.book.loading) return;
+  extendWindow();
+  const p = getPos(); if (p) updatePct(pctOf(p.i));
+  clearTimeout(recTimer); recTimer = setTimeout(recordPos, 700);
+}, { passive: true });
+
+/* ---------- 리더: 열기·닫기 ---------- */
+async function openBook(id, name) {
+  const seq = ++S.openSeq;
+  S.book = { id, name, lines: [''], loading: true };
+  textEl.textContent = '';
+  $('#bookTitle').textContent = name.replace(/\.txt$/i, '');
+  $('#loading').hidden = false; $('#loading').textContent = '불러오는 중…';
+  $('#reader').classList.add('hide-chrome');
+  show('reader');
+  try {
+    const [buf] = await Promise.all([
+      downloadBuf(id),
+      pullProg().catch(e => { if (e.status === 401) throw e; }),
+      ensureFont(S.set.font)
+    ]);
+    if (seq !== S.openSeq) return;
+    S.book.lines = decodeText(buf).replace(/\r\n?/g, '\n').split('\n');
+    S.book.loading = false;
+    $('#loading').hidden = true;
+    const r = S.prog.files[id];
+    goTo(r ? r.i : 0, r ? r.f : 0);
+    S.book.openedAt = Date.now();
+    page.focus({ preventScroll: true });
+    clearInterval(pushTimer); pushTimer = setInterval(() => { recordPos(); pushProg(); }, PUSH_EVERY);
+  } catch (e) {
+    if (seq !== S.openSeq) return;
+    if (onAuthFail(e)) return;
+    $('#loading').textContent = errMsg(e);
+    $('#reader').classList.remove('hide-chrome');
+  }
+}
+function closeBook() {
+  if (S.book && !S.book.loading) recordPos();
+  clearInterval(pushTimer);
+  S.book = null; S.openSeq++;
+  textEl.textContent = '';
+  closeSheets();
+  pushProg();
+  openLibrary();
+}
+$('#backBtn').onclick = closeBook;
+
+/* ---------- 리더: 조작 ---------- */
+let seeking = false;
+$('#seek').addEventListener('input', e => { seeking = true; $('#pct').textContent = (e.target.value / 10).toFixed(1) + '%'; });
+$('#seek').addEventListener('change', e => {
+  seeking = false;
+  if (!S.book || S.book.loading) return;
+  goTo(Math.round(e.target.value / 1000 * (S.book.lines.length - 1)), 0);
+  recordPos();
+});
+function pageBy(d) {
+  const lh = S.set.size * S.set.lh;
+  page.scrollBy(0, d * Math.max(80, page.clientHeight - lh * 1.5));
+}
+page.addEventListener('click', e => {
+  if (!S.book || S.book.loading) return;
+  const sel = window.getSelection && window.getSelection();
+  if (sel && String(sel).length) return;
+  const R = $('#reader');
+  if (!R.classList.contains('hide-chrome')) { R.classList.add('hide-chrome'); return; }
+  const w = page.clientWidth, x = e.clientX - page.getBoundingClientRect().left;
+  if (S.set.tap && x < w * 0.3) pageBy(-1);
+  else if (S.set.tap && x > w * 0.7) pageBy(1);
+  else R.classList.remove('hide-chrome');
+});
+document.addEventListener('keydown', e => {
+  if ($('#reader').hidden || !S.book || e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowRight' || e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey)) { e.preventDefault(); pageBy(1); }
+  else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || (e.key === ' ' && e.shiftKey)) { e.preventDefault(); pageBy(-1); }
+  else if (e.key === 'Escape') closeSheets();
+});
+
+/* ---------- 보기 설정 ---------- */
+function fontById(id) { return FONTS.find(f => f.id === id) || FONTS[0]; }
+async function ensureFont(id) {
+  const f = fontById(id); if (!f.g) return;
+  if (!document.getElementById('font-' + f.id)) {
+    const l = document.createElement('link'); l.rel = 'stylesheet'; l.id = 'font-' + f.id;
+    l.href = 'https://fonts.googleapis.com/css2?family=' + f.g + '&display=swap';
+    document.head.appendChild(l);
+    await new Promise(res => { l.onload = l.onerror = res; setTimeout(res, 3000); });
+  }
+  try { await Promise.race([document.fonts.load('20px "' + f.fam + '"', '가나다'), new Promise(r => setTimeout(r, 3000))]); } catch {}
+}
+function applySettings() {
+  const R = $('#reader').style, s = S.set;
+  R.setProperty('--rbg', s.bg); R.setProperty('--rfg', s.fg);
+  R.setProperty('--rfont', fontById(s.font).stack);
+  R.setProperty('--rsize', s.size + 'px'); R.setProperty('--rlh', s.lh);
+  R.setProperty('--rmargin', s.margin + 'px');
+  if (!$('#reader').hidden) document.querySelector('meta[name=theme-color]').content = s.bg;
+  $('#o-size').textContent = s.size + 'px';
+  $('#o-lh').textContent = s.lh.toFixed(1);
+  $('#o-margin').textContent = s.margin + 'px';
+  $('#bgPick').value = s.bg; $('#fgPick').value = s.fg;
+  $('#tapToggle').checked = !!s.tap;
+  for (const b of $('#fontChips').children) b.setAttribute('aria-pressed', b.dataset.font === s.font);
+  for (const b of $('#themeSw').children) b.setAttribute('aria-pressed', b.dataset.bg === s.bg && b.dataset.fg === s.fg);
+}
+async function changeSetting(patch) {
+  const keep = S.book && !S.book.loading ? getPos() : null;
+  Object.assign(S.set, patch, { t: Date.now() });
+  LS.set('settings', S.set);
+  S.prog.settings = Object.assign({}, S.set); LS.set('prog', S.prog); markDirty();
+  if (patch.font) await ensureFont(patch.font);
+  applySettings();
+  if (keep) requestAnimationFrame(() => goTo(keep.i, keep.f));
+}
+function applyRemoteSettings() {
+  const r = S.prog.settings;
+  if (!r || (r.t || 0) <= (S.set.t || 0)) return;
+  const keep = S.book && !S.book.loading ? getPos() : null;
+  S.set = Object.assign({}, DEF, r); LS.set('settings', S.set);
+  ensureFont(S.set.font).then(() => { applySettings(); if (keep) goTo(keep.i, keep.f); });
+}
+$('#fontChips').innerHTML = FONTS.map(f => `<button data-font="${f.id}">${f.name}</button>`).join('');
+$('#themeSw').innerHTML = THEMES.map(t =>
+  `<button data-bg="${t.bg}" data-fg="${t.fg}" style="background:${t.bg};color:${t.fg}" aria-label="${t.name}">가</button>`).join('');
+$('#fontChips').onclick = e => { const b = e.target.closest('button'); if (b) changeSetting({ font: b.dataset.font }); };
+$('#themeSw').onclick = e => { const b = e.target.closest('button'); if (b) changeSetting({ bg: b.dataset.bg, fg: b.dataset.fg }); };
+$('#styleSheet').addEventListener('click', e => {
+  const b = e.target.closest('button[data-k]'); if (!b) return;
+  const k = b.dataset.k, [lo, hi] = LIM[k];
+  let v = +(S.set[k] + (+b.dataset.d)).toFixed(1);
+  v = Math.max(lo, Math.min(hi, v));
+  if (v !== S.set[k]) changeSetting({ [k]: v });
+});
+$('#bgPick').onchange = e => changeSetting({ bg: e.target.value.toUpperCase() });
+$('#fgPick').onchange = e => changeSetting({ fg: e.target.value.toUpperCase() });
+$('#tapToggle').onchange = e => changeSetting({ tap: e.target.checked });
+
+/* ---------- 시트 ---------- */
+function openSheet(n) { $('#' + n + 'Scrim').hidden = false; $('#' + n + 'Sheet').hidden = false; }
+function closeSheets() { for (const n of ['style', 'acc']) { $('#' + n + 'Scrim').hidden = true; $('#' + n + 'Sheet').hidden = true; } }
+$('#styleBtn').onclick = () => openSheet('style');
+$('#styleScrim').onclick = closeSheets;
+$('#accScrim').onclick = closeSheets;
+$('#accountBtn').onclick = () => {
+  const n = Object.keys(S.prog.files || {}).length;
+  $('#accInfo').textContent = `MYBOX 맨 위 폴더의 '${PROG_NAME}' 파일에 읽던 위치 ${n}건과 보기 설정을 저장합니다. ` +
+    (syncState.s === 'fail' ? '마지막 저장 실패: ' + syncState.msg : '');
+  openSheet('acc');
+};
+$('#syncNowBtn').onclick = async () => {
+  $('#syncNowBtn').disabled = true;
+  try { await pullProg(); markDirty(); await pushProg(); renderRecent(); }
+  catch (e) { if (!onAuthFail(e)) setSync('fail', errMsg(e)); }
+  finally { $('#syncNowBtn').disabled = false; closeSheets(); }
+};
+$('#changeTokenBtn').onclick = () => showSetup('');
+$('#logoutBtn').onclick = () => {
+  if (!confirm('이 기기에서 토큰과 읽기 기록 사본을 지웁니다. MYBOX에 저장된 기록은 남습니다.')) return;
+  for (const k of ['token', 'progId', 'prog', 'dirty', 'nav']) LS.del(k);
+  S.token = ''; S.progId = null; S.prog = { v: 1, files: {} }; S.dirty = false; S.pulled = false;
+  S.nav = [{ id: null, name: 'MYBOX' }];
+  showSetup('');
+};
+
+/* ---------- 토스트 ---------- */
+let toastTimer = 0;
+function toast(text, actionLabel, action) {
+  const t = $('#toast');
+  t.innerHTML = '<span></span>' + (actionLabel ? '<button></button>' : '');
+  t.firstChild.textContent = text;
+  if (actionLabel) { t.lastChild.textContent = actionLabel; t.lastChild.onclick = () => { t.hidden = true; action(); }; }
+  t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 8000);
+}
+
+/* ---------- 앱 전환 시 저장·불러오기 ---------- */
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState === 'hidden') {
+    if (S.book && !S.book.loading) recordPos();
+    pushProg();
+    return;
+  }
+  if (!S.token || Date.now() - S.lastPull < 30000) return;
+  const book = S.book;
+  const mine = book && S.prog.files[book.id];
+  try { await pullProg(); } catch (e) { onAuthFail(e); return; }
+  if (!$('#library').hidden) renderRecent();
+  if (!book || book !== S.book || book.loading) return;
+  const r = S.prog.files[book.id];
+  if (r && mine && r !== mine && r.t > mine.t && Math.abs(r.i - mine.i) > 2)
+    toast('다른 기기에서 ' + r.pct.toFixed(1) + '%까지 읽었습니다.', '이동', () => { goTo(r.i, r.f); recordPos(); });
+});
+window.addEventListener('pagehide', () => { if (S.book && !S.book.loading) recordPos(); pushProg(); });
+
+/* ---------- 시작 ---------- */
+applySettings();
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+if (S.token) openLibrary(); else showSetup('');
+</script>
+</body>
+</html>
