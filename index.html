@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#FAFAF7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Viewer">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -85,7 +85,7 @@ button{cursor:pointer}
 #reader{--rbg:#FFFFFF;--rfg:#1F1F1F;--rfont:var(--serif);--rsize:19px;--rlh:1.8;--rmargin:22px;
   background:var(--rbg);color:var(--rfg)}
 #page{flex:1;overflow-y:auto;overflow-anchor:none;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
-#text{max-width:44em;margin:0 auto;font-family:var(--rfont);font-size:var(--rsize);line-height:var(--rlh);
+#text{max-width:44em;margin:0 auto;font-family:var(--rfont);font-size:var(--rsize);line-height:var(--rlh);font-weight:var(--rweight,400);
   padding:calc(var(--sat) + 28px) calc(var(--sar) + var(--rmargin)) calc(var(--sab) + 40vh) calc(var(--sal) + var(--rmargin));
   word-break:keep-all;overflow-wrap:anywhere}
 #text p{margin:0;padding:0 0 .35em;white-space:pre-wrap}
@@ -158,8 +158,9 @@ button{cursor:pointer}
 #reader.pdfpage #page{overflow:hidden;touch-action:manipulation}
 #text p.h{font-weight:700;font-size:1.18em;padding:.9em 0 .5em;break-after:avoid}
 #text p.img{padding:.4em 0;break-inside:avoid;text-align:center}
-#text p.img img{max-width:100%;max-height:80vh;height:auto;display:block;margin:0 auto}
-#reader.paged #text p.img img{max-height:var(--colh,70vh)}
+#text{--imgh:80vh}
+#reader.paged #text{--imgh:var(--colh,70vh)}
+#text p.img img{max-width:100%;max-height:var(--imgh);height:auto;display:block;margin:0 auto}
 #text .hl{border-radius:2px;cursor:pointer;color:inherit}
 .hl-y{background:rgba(255,212,0,.38)} .hl-g{background:rgba(70,200,90,.32)}
 .hl-b{background:rgba(70,140,255,.30)} .hl-p{background:rgba(255,90,170,.30)}
@@ -205,6 +206,23 @@ button{cursor:pointer}
 .tm{display:flex;gap:10px;align-items:center;margin-top:10px;font-size:14px}
 .tm input{width:auto!important;padding:6px 8px!important}
 @media (prefers-reduced-motion:reduce){ .chrome{transition:none} #syncBtn.busy svg{animation:none;opacity:.4} }
+/* 전자잉크: 대비 최대, 잔상 유발 효과 제거 */
+:root.eink{--paper:#FFFFFF;--ink:#000000;--mute:#000000;--line:#000000;--card:#FFFFFF;--accent:#000000;--accent-ink:#FFFFFF;--warn:#000000;color-scheme:light}
+.eink *{transition:none!important;animation:none!important;box-shadow:none!important;text-shadow:none!important}
+.eink .chrome{background:var(--rbg)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-color:#000!important;border-width:2px!important}
+.eink .scrim{background:transparent}
+.eink .sheet{border-top:2px solid #000}
+.eink #toast{background:#FFF;color:#000;border:2px solid #000}
+.eink #toast button{color:#000;text-decoration:underline}
+.eink #selBar{background:#FFF;color:#000;border:2px solid #000}
+.eink #selBar .memo-b{color:#000}
+.eink #selBar button{border:2px solid #000}
+.eink .hl{text-decoration:underline 2px!important;text-underline-offset:3px}
+.eink .hl-y{background:#FFE600}.eink .hl-g{background:#7CFF7C}.eink .hl-b{background:#8FC3FF}.eink .hl-p{background:#FF9AD0}
+.eink #text mark.find{background:#000;color:#FFF}
+.eink #rbot input[type=range]{accent-color:#000}
+.eink .row .bar i{background:#000}
+.eink .chips button[aria-pressed=true],.eink .tabs button[aria-selected=true]{background:#000;color:#FFF}
 </style>
 </head>
 <body>
@@ -290,6 +308,10 @@ button{cursor:pointer}
     <button data-axis="x">왼쪽·오른쪽</button><button data-axis="y">위·아래</button></div></div>
   <div class="field" id="tapField"><label class="toggle">스크롤 모드에서도 화면을 눌러 한 화면씩 넘기기 <input type="checkbox" id="tapToggle"></label></div>
   <div class="field"><label class="toggle">넓은 가로 화면에서 2쪽 보기 <input type="checkbox" id="spreadToggle"></label></div>
+  <div class="field"><label class="toggle">전자잉크 모드 (이 기기만) <input type="checkbox" id="einkToggle"></label>
+    <span class="lbl" style="margin-top:6px">흰 바탕·검은 글자 고정, 화면 효과·반투명·그림자 제거, 대비 강화</span></div>
+  <div class="field"><span class="lbl">글자 굵기 (이 기기만)</span><div class="chips" id="weightChips">
+    <button data-w="400">보통</button><button data-w="500">약간 굵게</button><button data-w="600">굵게</button><button data-w="700">아주 굵게</button></div></div>
   <div class="field"><span class="lbl">글꼴</span><div class="chips" id="fontChips"></div></div>
   <div class="field"><span class="lbl">글자 크기</span>
     <div class="step"><button data-k="size" data-d="-1" aria-label="작게">−</button><output id="o-size"></output><button data-k="size" data-d="1" aria-label="크게">+</button></div></div>
@@ -362,6 +384,15 @@ button{cursor:pointer}
   <div class="actions"><button class="btn ghost" id="itemRename">이름 바꾸기</button><button class="btn ghost" id="itemDelete">삭제</button></div>
 </div>
 
+<!-- 기록 삭제 -->
+<div class="scrim" id="recScrim" hidden></div>
+<div class="sheet" id="recSheet" role="dialog" aria-label="기록 삭제" hidden>
+  <div class="grab"></div>
+  <h2 id="recName"></h2>
+  <p class="info">모든 기기에서 함께 삭제됩니다. 책 파일은 그대로 남습니다.</p>
+  <div class="actions"><button class="btn ghost" id="recPos">읽은 위치만 삭제</button><button class="btn ghost" id="recAll">읽은 위치 + 북마크·하이라이트·메모 삭제</button></div>
+</div>
+
 <!-- 계정 -->
 <div class="scrim" id="accScrim" hidden></div>
 <div class="sheet" id="accSheet" role="dialog" aria-label="동기화와 연결 해제" hidden>
@@ -370,6 +401,7 @@ button{cursor:pointer}
   <p class="info" id="accInfo"></p>
   <div class="actions">
     <button class="btn" id="syncNowBtn">읽기 기록 지금 동기화</button>
+    <button class="btn ghost" id="wipeBtn">동기화 기록 전체 삭제</button>
     <button class="btn ghost" id="logoutBtn">이 기기에서 연결 해제</button>
   </div>
   <h2 style="margin-top:24px">기기에 보관한 책</h2>
@@ -433,6 +465,7 @@ const S = {
   book: null, first: 0, last: -1, openSeq: 0, pdfCur: 0
 };
 if (!S.prog.notes) S.prog.notes = {};
+S.local = Object.assign({ eink: false, weight: 400 }, LS.get('local', {}));
 S.nav[0] = { id: '', name: '저장소' };
 
 /* ---------- GitHub API ---------- */
@@ -674,8 +707,15 @@ function setSync(s, msg) {
 /* ---------- 화면 전환 ---------- */
 function show(id) {
   for (const s of ['setup', 'library', 'reader']) $('#' + s).hidden = s !== id;
-  document.querySelector('meta[name=theme-color]').content =
-    id === 'reader' ? colors().bg : getComputedStyle(document.documentElement).getPropertyValue('--paper').trim();
+  syncChrome();
+}
+/* 노치·상태바 영역 색: 페이지 바탕(html·body)과 theme-color를 현재 화면 색으로 항상 함께 맞춤 */
+function syncChrome() {
+  const reader = !$('#reader').hidden;
+  const bg = reader ? colors().bg : getComputedStyle(document.documentElement).getPropertyValue('--paper').trim();
+  document.documentElement.style.backgroundColor = bg;
+  document.body.style.backgroundColor = bg;
+  document.querySelector('meta[name=theme-color]').content = bg;
 }
 function showSetup(msg) {
   closeSheets(); S.book = null;
@@ -729,10 +769,11 @@ function renderRecent() {
   const items = Object.entries(S.prog.files || {}).filter(([, r]) => !r.del).sort((a, b) => (b[1].t || 0) - (a[1].t || 0)).slice(0, 6);
   $('#recentWrap').hidden = !items.length;
   $('#recentList').innerHTML = items.map(([id, r]) =>
-    `<button class="row" data-open="${esc(id)}" data-name="${esc(r.name)}">${ICON_BOOK}
+    `<div class="item"><button class="row" data-open="${esc(id)}" data-name="${esc(r.name)}">${ICON_BOOK}
       <span class="main"><span class="name">${esc(r.name)}</span>
       <span class="sub">${(r.pct || 0).toFixed(1)}% · ${fmtAgo(r.t)}</span>
-      <span class="bar"><i style="width:${Math.min(100, r.pct || 0)}%"></i></span></span></button>`).join('');
+      <span class="bar"><i style="width:${Math.min(100, r.pct || 0)}%"></i></span></span></button>
+      <button class="more" data-forget="${esc(id)}" data-name="${esc(r.name)}" aria-label="${esc(r.name)} 기록 삭제">⋯</button></div>`).join('');
 }
 function renderCrumbs() {
   $('#crumbs').innerHTML = S.nav.map((n, i) => (i ? '<span>/</span>' : '') + `<button data-crumb="${i}">${esc(n.name)}</button>`).join('');
@@ -780,6 +821,7 @@ $('#library').addEventListener('click', e => {
   else if (b.dataset.crumb != null) { S.nav = S.nav.slice(0, +b.dataset.crumb + 1); LS.set('nav', S.nav); loadFolder(); }
   else if (b.dataset.open) openBook(b.dataset.open, b.dataset.name, b.dataset.sha);
   else if (b.dataset.more) openItem(b.dataset.more, b.dataset.kind, b.dataset.name);
+  else if (b.dataset.forget) openForget(b.dataset.forget, b.dataset.name);
   else if (b.hasAttribute('data-retry')) loadFolder();
 });
 $('#refreshBtn').onclick = () => { loadFolder(); pullProg().then(renderRecent).catch(e => setSync('fail', errMsg(e))); };
@@ -991,7 +1033,12 @@ function fillBlock(p, i) {
   p.textContent = '';
   if (t && typeof t === 'object' && t.img) {
     p.className = 'img';
-    const im = document.createElement('img'); im.src = t.img; im.alt = ''; p.appendChild(im); return;
+    const im = document.createElement('img'); im.alt = '';
+    if (t.w && t.h) {   // 그림이 늦게 떠도 쪽 배치가 바뀌지 않도록 크기를 미리 확보
+      im.style.aspectRatio = t.w + ' / ' + t.h;
+      im.style.width = 'min(100%, ' + t.w + 'px, calc(var(--imgh) * ' + (t.w / t.h).toFixed(4) + '))';
+    }
+    im.src = t.img; p.appendChild(im); return;
   }
   const text = blockText(i);
   p.className = t && t.h ? 'h' : text.trim() ? '' : 'blank';
@@ -1192,7 +1239,7 @@ function recordPos() {
   const p = getPos(); if (!p) return;
   const prev = S.prog.files[S.book.id] || {};
   if (!prev.del && prev.i === p.i && prev.pm === curPm() && Math.abs((prev.f || 0) - p.f) < 0.02) return;
-  const rec = { name: S.book.name, i: p.i, f: +p.f.toFixed(3), pct: +pctOf(p.i).toFixed(1), t: Date.now() };
+  const rec = { name: S.book.name, i: p.i, f: +p.f.toFixed(3), pct: +pctOf(p.i).toFixed(1), t: Date.now(), a: anchorOf(p.i) };
   if (S.book.kind === 'pdf') { rec.pm = curPm(); rec.pg = curPg(p.i); rec.pdfMode = S.book.view === 'pdfpage' ? 'page' : 'text'; }
   S.prog.files[S.book.id] = rec;
   LS.set('prog', S.prog); markDirty();
@@ -1273,7 +1320,9 @@ async function parseEpub(buf, onProg) {
     if (!f) return;
     const ext = path.split('.').pop().toLowerCase();
     const url = URL.createObjectURL(new Blob([await f.async('arraybuffer')], { type: MIME[ext] || 'image/*' }));
-    urls.push(url); blocks.push({ img: url });
+    let w = 0, h = 0;
+    try { const im = new Image(); im.src = url; await im.decode(); w = im.naturalWidth; h = im.naturalHeight; } catch {}
+    urls.push(url); blocks.push(w && h ? { img: url, w, h } : { img: url });
   }
   async function walk(el, href) {
     for (const n of [...el.childNodes]) {
@@ -1430,11 +1479,23 @@ function applyView() {
 }
 
 /* ---------- 열기·닫기 ---------- */
+const anchorOf = i => isFlow() ? blockText(i).replace(/\s+/g, ' ').trim().slice(0, 24) : '';
+/* 기기마다 책을 읽어들이는 방식이 미세하게 달라 문단 번호가 어긋나도 같은 문장을 찾아감 */
+function fixByAnchor(i, a) {
+  if (!a || !isFlow() || anchorOf(i) === a) return i;
+  const L = units();
+  for (let d = 1; d < L; d++) {
+    if (i - d >= 0 && anchorOf(i - d) === a) return i - d;
+    if (i + d < L && anchorOf(i + d) === a) return i + d;
+    if (d > 3000 && i - d < 0 && i + d >= L) break;
+  }
+  return i;
+}
 function startPos(rec) {
   if (!rec || rec.del) return { i: 0, f: 0 };
   const B = S.book;
-  if (B.kind !== 'pdf') return { i: rec.i || 0, f: rec.f || 0 };
-  if (rec.pm === curPm()) return { i: rec.i || 0, f: rec.f || 0 };
+  if (B.kind !== 'pdf') return { i: fixByAnchor(rec.i || 0, rec.a), f: rec.f || 0 };
+  if (rec.pm === curPm()) return { i: fixByAnchor(rec.i || 0, rec.a), f: rec.f || 0 };
   const pg = rec.pg || 0;
   return isFlow() ? { i: B.pageStart[Math.min(pg, B.pageStart.length - 1)] || 0, f: 0 } : { i: pg, f: 0 };
 }
@@ -1734,11 +1795,16 @@ document.addEventListener('keydown', e => {
 
 /* ---------- 보기 설정 ---------- */
 function fontById(id) { return FONTS.find(f => f.id === id) || FONTS[0]; }
+const FONT_W = { NotoSerifKR: [400, 500, 600, 700], NotoSansKR: [400, 500, 600, 700], Hahmlet: [400, 500, 600, 700],
+  NanumMyeongjo: [400, 700, 800], NanumGothic: [400, 700, 800], GowunBatang: [400, 700] };
+const fontWeight = id => { const ws = FONT_W[id] || [400, 700], w = S.local.weight || 400; return ws.find(x => x >= w) || ws[ws.length - 1]; };
 async function ensureFont(id) {
   const f = fontById(id); if (!f.g) return;
-  if (!document.getElementById('font-' + f.id)) {
-    const l = document.createElement('link'); l.rel = 'stylesheet'; l.id = 'font-' + f.id;
-    l.href = 'https://fonts.googleapis.com/css2?family=' + f.g + '&display=swap';
+  const w = fontWeight(id), ws = [...new Set([400, w, 700].filter(x => (FONT_W[id] || [400, 700]).includes(x)))].sort((a, b) => a - b);
+  const lid = 'font-' + f.id + '-' + ws.join('-');
+  if (!document.getElementById(lid)) {
+    const l = document.createElement('link'); l.rel = 'stylesheet'; l.id = lid;
+    l.href = 'https://fonts.googleapis.com/css2?family=' + f.g + ':wght@' + ws.join(';') + '&display=swap';
     document.head.appendChild(l);
     await new Promise(res => { l.onload = l.onerror = res; setTimeout(res, 3000); });
   }
@@ -1755,7 +1821,8 @@ function nightOn() {
   }
   return false;
 }
-const colors = () => nightOn() && !isDark(S.set.bg) ? NIGHT : { bg: S.set.bg, fg: S.set.fg };
+const EINK = { bg: '#FFFFFF', fg: '#000000' };
+const colors = () => S.local.eink ? EINK : nightOn() && !isDark(S.set.bg) ? NIGHT : { bg: S.set.bg, fg: S.set.fg };
 let lastNight = null;
 function applySettings() {
   const R = $('#reader').style, s = S.set, c = colors();
@@ -1764,7 +1831,11 @@ function applySettings() {
   R.setProperty('--rfont', fontById(s.font).stack);
   R.setProperty('--rsize', s.size + 'px'); R.setProperty('--rlh', s.lh);
   R.setProperty('--rmargin', s.margin + 'px');
-  if (!$('#reader').hidden) document.querySelector('meta[name=theme-color]').content = c.bg;
+  R.setProperty('--rweight', S.local.weight > 400 ? fontWeight(s.font) : 400);
+  document.documentElement.classList.toggle('eink', !!S.local.eink);
+  $('#einkToggle').checked = !!S.local.eink;
+  for (const b of $('#weightChips').children) b.setAttribute('aria-pressed', +b.dataset.w === (S.local.weight || 400));
+  syncChrome();
   $('#o-size').textContent = s.size + 'px'; $('#o-lh').textContent = s.lh.toFixed(1); $('#o-margin').textContent = s.margin + 'px';
   $('#bgPick').value = s.bg; $('#fgPick').value = s.fg;
   $('#tapToggle').checked = !!s.tap; $('#spreadToggle').checked = !!s.spread;
@@ -1777,6 +1848,13 @@ function applySettings() {
   for (const b of $('#themeSw').children) b.setAttribute('aria-pressed', b.dataset.bg === s.bg && b.dataset.fg === s.fg);
   if (S.book && !S.book.loading) applyView();
   if (S.book && S.book.pdf && !isFlow()) pdfView.classList.toggle('inv', isDark(c.bg));
+}
+async function changeLocal(patch) {
+  const keep = S.book && !S.book.loading ? getPos() : null;
+  Object.assign(S.local, patch); LS.set('local', S.local);
+  await ensureFont(S.set.font);
+  applySettings();
+  if (keep) requestAnimationFrame(() => goTo(keep.i, keep.f));
 }
 async function changeSetting(patch) {
   const keep = S.book && !S.book.loading ? getPos() : null;
@@ -1823,10 +1901,12 @@ $('#bgPick').onchange = e => changeSetting({ bg: e.target.value.toUpperCase() })
 $('#fgPick').onchange = e => changeSetting({ fg: e.target.value.toUpperCase() });
 $('#tapToggle').onchange = e => changeSetting({ tap: e.target.checked });
 $('#spreadToggle').onchange = e => changeSetting({ spread: e.target.checked });
+$('#einkToggle').onchange = e => changeLocal(e.target.checked && (S.local.weight || 400) < 500 ? { eink: true, weight: 500 } : { eink: e.target.checked });
+chip('#weightChips', b => changeLocal({ weight: +b.dataset.w }));
 $('#darkFrom').onchange = e => changeSetting({ darkFrom: e.target.value || '19:00' });
 $('#darkTo').onchange = e => changeSetting({ darkTo: e.target.value || '07:00' });
 setInterval(() => { if (nightOn() !== lastNight) applySettings(); }, 30000);
-try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (S.set.dark === 'system') applySettings(); }); } catch {}
+try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (S.set.dark === 'system') applySettings(); else syncChrome(); }); } catch {}
 let resizeTimer = 0;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
@@ -1837,7 +1917,7 @@ window.addEventListener('resize', () => {
 });
 
 /* ---------- 시트 ---------- */
-const SHEETS = ['style', 'acc', 'panel', 'find', 'note', 'up', 'item'];
+const SHEETS = ['style', 'acc', 'panel', 'find', 'note', 'up', 'item', 'rec'];
 function openSheet(n) { closeSheets(); hideSelBar(); $('#' + n + 'Scrim').hidden = false; $('#' + n + 'Sheet').hidden = false; }
 function closeSheets() { for (const n of SHEETS) { $('#' + n + 'Scrim').hidden = true; $('#' + n + 'Sheet').hidden = true; } }
 const openSheets = () => SHEETS.filter(n => !$('#' + n + 'Sheet').hidden);
@@ -1902,6 +1982,31 @@ $('#syncBtn').onclick = async () => {
   } finally { btn.classList.remove('busy'); }
 };
 
+/* ---------- 동기화 기록 삭제(삭제 표시로 모든 기기에 반영) ---------- */
+function forgetBook(id, withNotes) {
+  const now = Date.now(), r = S.prog.files[id];
+  if (r) S.prog.files[id] = { del: true, name: r.name, t: now };
+  if (withNotes) for (const [k, it] of Object.entries(S.prog.notes[id] || {})) if (!it.del) S.prog.notes[id][k] = { id: it.id, del: true, t: now };
+  if (S.book && S.book.id === id) { S.book.moved = false; rebuildMarks(); refreshVisible(); }
+}
+let forgetCtx = null;
+function openForget(id, name) { forgetCtx = id; $('#recName').textContent = name; openSheet('rec'); }
+async function afterForget(msg) {
+  LS.set('prog', S.prog); markDirty(); closeSheets(); renderRecent();
+  if (!$('#library').hidden) loadFolder();
+  await pushProg(); toast(msg);
+}
+$('#recPos').onclick = () => { forgetBook(forgetCtx, false); afterForget('읽은 위치 기록을 삭제했습니다.'); };
+$('#recAll').onclick = () => {
+  if (!confirm('이 책의 북마크·하이라이트·메모까지 모두 삭제합니다.')) return;
+  forgetBook(forgetCtx, true); afterForget('이 책의 기록을 모두 삭제했습니다.');
+};
+$('#wipeBtn').onclick = () => {
+  if (!confirm('모든 책의 읽은 위치, 북마크·하이라이트·메모를 모든 기기에서 삭제합니다. 보기 설정과 책 파일은 남습니다.')) return;
+  for (const id of new Set([...Object.keys(S.prog.files), ...Object.keys(S.prog.notes)])) forgetBook(id, true);
+  afterForget('동기화 기록을 모두 삭제했습니다.');
+};
+
 /* ---------- 토스트 ---------- */
 let toastTimer = 0;
 function toast(text, actionLabel, action) {
@@ -1927,6 +2032,7 @@ document.addEventListener('visibilitychange', async () => {
 window.addEventListener('pagehide', () => { if (S.book && !S.book.loading) recordPos(); pushProg(); });
 
 /* ---------- 시작 ---------- */
+try { if (!S.local.eink && !LS.get('einkHint', false) && matchMedia('(update: slow)').matches) { LS.set('einkHint', true); setTimeout(() => toast('전자잉크 화면으로 보입니다. 보기 설정(Aa)에서 전자잉크 모드를 켜 보세요.'), 1500); } } catch {}
 applySettings();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 window.addEventListener('hashchange', () => {
