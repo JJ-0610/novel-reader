@@ -31,6 +31,7 @@
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;overscroll-behavior:none}
+#statusFill{position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);z-index:19;pointer-events:none}
 body{background:var(--paper);color:var(--ink);font-family:var(--ui);font-size:16px;
   -webkit-text-size-adjust:100%;word-break:keep-all;overflow-wrap:anywhere}
 button,input,select{font:inherit;color:inherit}
@@ -86,13 +87,13 @@ button{cursor:pointer}
   background:var(--rbg);color:var(--rfg)}
 #page{flex:1;overflow-y:auto;overflow-anchor:none;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 #text{max-width:44em;margin:0 auto;font-family:var(--rfont);font-size:var(--rsize);line-height:var(--rlh);font-weight:var(--rweight,400);
-  padding:calc(var(--sat) + 28px) calc(var(--sar) + var(--rmargin)) calc(var(--sab) + 40vh) calc(var(--sal) + var(--rmargin));
+  padding:calc(var(--sat) + 18px) calc(var(--sar) + var(--rmargin)) calc(var(--sab) + 40vh) calc(var(--sal) + var(--rmargin));
   word-break:keep-all;overflow-wrap:anywhere}
 #text p{margin:0;padding:0 0 .35em;white-space:pre-wrap}
 #text p.blank{height:.6em;padding:0}
 #loading{position:absolute;inset:0;display:grid;place-items:center;font-size:15px;opacity:.7;pointer-events:none;padding:24px;text-align:center}
 .chrome{position:absolute;left:0;right:0;z-index:5;background:var(--rbg);transition:transform .2s ease,opacity .2s ease}
-#rtop{top:0;padding:calc(var(--sat) + 4px) calc(var(--sar) + 6px) 6px calc(var(--sal) + 6px);display:flex;align-items:center;gap:4px;
+#rtop{top:0;padding:calc(var(--sat) + 14px) calc(var(--sar) + 6px) 6px calc(var(--sal) + 6px);display:flex;align-items:center;gap:4px;
   border-bottom:1px solid color-mix(in srgb,var(--rfg) 12%,transparent)}
 #rtop .t{flex:1;min-width:0;font-size:15px;font-family:var(--ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #rbot{bottom:0;padding:10px calc(var(--sar) + 18px) calc(var(--sab) + 12px) calc(var(--sal) + 18px);font-family:var(--ui);
@@ -104,7 +105,7 @@ button{cursor:pointer}
 #reader.hide-chrome #rtop{transform:translateY(-100%);opacity:0;pointer-events:none}
 #reader.hide-chrome #rbot{transform:translateY(100%);opacity:0;pointer-events:none}
 #reader.paged #page{overflow:hidden;touch-action:manipulation}
-#reader.paged #text{max-width:none;margin:0;column-fill:auto;padding-bottom:calc(var(--sab) + 24px)}
+#reader.paged #text{max-width:none;margin:0;column-fill:auto;padding-bottom:calc(var(--sab) * .55 + 6px);will-change:transform}
 #reader.paged #text p{orphans:1;widows:1}
 
 /* 시트 */
@@ -246,7 +247,7 @@ button{cursor:pointer}
   <div class="top">
     <h1>서재</h1>
     <button class="icon-btn" id="refreshBtn" aria-label="새로고침"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 5v6h-6"/></svg></button>
-    <button class="icon-btn" id="accountBtn" aria-label="동기화와 연결 해제"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></button>
+    <button class="icon-btn" id="accountBtn" aria-label="설정(동기화·연결)"><svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button>
   </div>
   <div class="body"><div class="inner">
     <div id="recentWrap" hidden>
@@ -275,7 +276,7 @@ button{cursor:pointer}
     <button class="icon-btn" id="bmBtn" aria-label="북마크" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M6.5 3.5h11v17l-5.5-4-5.5 4z"/></svg></button>
     <button class="icon-btn" id="panelBtn" aria-label="목차·북마크·메모"><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r=".8"/><circle cx="4" cy="12" r=".8"/><circle cx="4" cy="18" r=".8"/></svg></button>
     <button class="icon-btn" id="syncBtn" aria-label="지금 동기화"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 21v-5h-5"/></svg></button>
-    <button class="icon-btn" id="styleBtn" aria-label="보기 설정"><svg viewBox="0 0 24 24"><path d="M3 19l5-14 5 14"/><path d="M5 14h6"/><path d="M15 19l3.5-9 3.5 9"/><path d="M16.3 16h4.4"/></svg></button>
+    <button class="icon-btn" id="styleBtn" aria-label="보기 설정"><svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button>
   </header>
   <footer id="rbot" class="chrome">
     <div class="line">
@@ -410,6 +411,7 @@ button{cursor:pointer}
 </div>
 
 <div id="toast" hidden></div>
+<div id="statusFill" aria-hidden="true"></div>
 <script>
 'use strict';
 const CH = 300;                     // 스크롤 모드: 한 번에 그리는 블록 묶음
@@ -716,7 +718,12 @@ function syncChrome() {
   const bg = reader ? colors().bg : getComputedStyle(document.documentElement).getPropertyValue('--paper').trim();
   document.documentElement.style.backgroundColor = bg;
   document.body.style.backgroundColor = bg;
-  document.querySelector('meta[name=theme-color]').content = bg;
+  const old = document.querySelector('meta[name=theme-color]');
+  if (!old || old.content !== bg) {   // 사파리는 기존 태그 값 변경을 놓치는 경우가 있어 새 태그로 교체
+    const m = document.createElement('meta'); m.name = 'theme-color'; m.content = bg;
+    if (old) old.replaceWith(m); else document.head.appendChild(m);
+  }
+  $('#statusFill').style.backgroundColor = bg;
 }
 function showSetup(msg) {
   closeSheets(); S.book = null;
@@ -1076,19 +1083,20 @@ const spreadOn = () => S.set.spread && page.clientWidth >= 900 && page.clientWid
 function layoutPaged() {
   const t = textEl.style;
   if (!isFlow() || !paged()) {
-    for (const k of ['width', 'height', 'columnWidth', 'columnGap', 'paddingLeft', 'paddingRight']) t[k] = '';
-    page.scrollLeft = 0; return;
+    for (const k of ['width', 'height', 'columnWidth', 'columnGap', 'paddingLeft', 'paddingRight', 'transform']) t[k] = '';
+    page.scrollLeft = 0; S.pageIdx = 0; return;
   }
-  let W = page.clientWidth; const H = page.clientHeight;
+  const pr = page.getBoundingClientRect();
+  const W = pr.width, H = page.clientHeight;
+  page.scrollLeft = 0;
   if (spreadOn()) {
-    W -= W % 2;
     const colW = Math.max(200, Math.min(W / 2 - 2 * S.set.margin, Math.round(S.set.size * 34)));
     const g = W / 2 - colW;
     PG = { W, pm: g / 2, two: true };
     t.width = W + 'px'; t.paddingLeft = t.paddingRight = (g / 2) + 'px';
     t.columnWidth = colW + 'px'; t.columnGap = g + 'px';
   } else {
-    const pm = Math.max(S.set.margin, Math.floor((W - S.set.size * 40) / 2));
+    const pm = Math.max(S.set.margin, (W - S.set.size * 40) / 2);
     PG = { W, pm, two: false };
     t.width = W + 'px'; t.paddingLeft = t.paddingRight = pm + 'px';
     t.columnWidth = (W - 2 * pm) + 'px'; t.columnGap = (2 * pm) + 'px';
@@ -1097,10 +1105,10 @@ function layoutPaged() {
   const cs = getComputedStyle(textEl);
   textEl.style.setProperty('--colh', Math.max(120, H - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 8) + 'px');
 }
-const pageCount = () => Math.max(1, Math.ceil((page.scrollWidth - 2) / PG.W));
-const curPage = () => Math.round(page.scrollLeft / PG.W);
-const setPage = i => { page.scrollLeft = i * PG.W; };
-function renderPagedChunk(k) { page.scrollLeft = 0; textEl.textContent = ''; S.first = S.last = k; textEl.appendChild(chunkEl(k)); }
+const pageCount = () => Math.max(1, Math.ceil((textEl.scrollWidth - 2) / PG.W));
+const curPage = () => S.pageIdx || 0;
+const setPage = i => { S.pageIdx = i; textEl.style.transform = 'translateX(' + (-i * PG.W) + 'px)'; };
+function renderPagedChunk(k) { setPage(0); textEl.textContent = ''; S.first = S.last = k; textEl.appendChild(chunkEl(k)); }
 function renderAround(k) {
   const n = Math.ceil(units() / CH);
   textEl.textContent = '';
@@ -1169,7 +1177,7 @@ function goTo(i, f) {
       const total = rects.reduce((a, q) => a + q.height, 0);
       let acc = 0, target = rects[0];
       for (const q of rects) { target = q; acc += q.height; if (!total || acc / total > (f || 0) + 1e-6) break; }
-      if (target) setPage(Math.max(0, Math.floor((target.left - page.getBoundingClientRect().left + 2) / PG.W)));
+      if (target) setPage(Math.max(0, Math.floor((target.left - textEl.getBoundingClientRect().left + 2) / PG.W)));
     }
   } else {
     renderAround(Math.floor(i / CH));
@@ -1910,13 +1918,18 @@ $('#darkTo').onchange = e => changeSetting({ darkTo: e.target.value || '07:00' }
 setInterval(() => { if (nightOn() !== lastNight) applySettings(); }, 30000);
 try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (S.set.dark === 'system') applySettings(); else syncChrome(); }); } catch {}
 let resizeTimer = 0;
-window.addEventListener('resize', () => {
+let lastSize = '';
+function relayout() {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
     if (!S.book || S.book.loading || $('#reader').hidden) return;
+    const r = page.getBoundingClientRect(), key = r.width.toFixed(1) + 'x' + r.height.toFixed(1);
+    if (key === lastSize) return; lastSize = key;
     const keep = getPos(); if (keep) goTo(keep.i, keep.f);
-  }, 200);
-});
+  }, 150);
+}
+window.addEventListener('resize', relayout);
+try { new ResizeObserver(relayout).observe(page); } catch {}
 
 /* ---------- 시트 ---------- */
 const SHEETS = ['style', 'acc', 'panel', 'find', 'note', 'up', 'item', 'rec'];
