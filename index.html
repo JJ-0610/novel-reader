@@ -3,11 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>
+/* 사파리(브라우저)에서는 노치·하단 영역을 쓰지 않음 → 그 영역은 테마색 없이 기본 바탕 */
+(function () {
+  var sa = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+  document.documentElement.classList.toggle('standalone', !!sa);
+  if (!sa) document.querySelector('meta[name=viewport]').content = 'width=device-width, initial-scale=1';
+})();
+</script>
 <title>Viewer</title>
 <meta name="theme-color" content="#FAFAF7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Viewer">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -87,7 +95,7 @@ button{cursor:pointer}
   background:var(--rbg);color:var(--rfg)}
 #page{flex:1;overflow-y:auto;overflow-anchor:none;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 #text{max-width:44em;margin:0 auto;font-family:var(--rfont);font-size:var(--rsize);line-height:var(--rlh);font-weight:var(--rweight,400);
-  padding:calc(var(--sat) + 18px) calc(var(--sar) + var(--rmargin)) calc(var(--sab) + 40vh) calc(var(--sal) + var(--rmargin));
+  padding:calc(var(--sat) + 18px + var(--rvmargin,0px)) calc(var(--sar) + var(--rmargin)) calc(var(--sab) + 40vh) calc(var(--sal) + var(--rmargin));
   word-break:keep-all;overflow-wrap:anywhere}
 #text p{margin:0;padding:0 0 .35em;white-space:pre-wrap}
 #text p.blank{height:.6em;padding:0}
@@ -105,7 +113,7 @@ button{cursor:pointer}
 #reader.hide-chrome #rtop{transform:translateY(-100%);opacity:0;pointer-events:none}
 #reader.hide-chrome #rbot{transform:translateY(100%);opacity:0;pointer-events:none}
 #reader.paged #page{overflow:hidden;touch-action:manipulation}
-#reader.paged #text{max-width:none;margin:0;column-fill:auto;padding-bottom:calc(var(--sab) * .55 + 6px);will-change:transform}
+#reader.paged #text{max-width:none;margin:0;column-fill:auto;padding-bottom:calc(var(--sab) * .55 + 6px + var(--rvmargin,0px));will-change:transform}
 #reader.paged #text p{orphans:1;widows:1}
 
 /* 시트 */
@@ -151,10 +159,16 @@ button{cursor:pointer}
 @media (prefers-reduced-motion:reduce){ .chrome{transition:none} #syncBtn.busy svg{animation:none;opacity:.4} }
 /* ---- v2 추가 ---- */
 #page{position:relative}
-#pdfView{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:12px;
-  padding:calc(var(--sat) + 8px) 8px calc(var(--sab) + 8px)}
-#pdfView canvas{background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.18);max-width:100%}
-#pdfView.inv canvas{filter:invert(.9) hue-rotate(180deg)}
+#pdfView{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:12px;--pv:var(--rvmargin,0px);
+  padding:calc(var(--sat) + 8px + var(--pv)) 8px calc(var(--sab) + 8px + var(--pv))}
+.pdfpg{position:relative;flex:none}
+.pdfpg canvas{display:block}
+#pdfView.inv .pdfpg canvas{filter:invert(.9) hue-rotate(180deg)}
+.textLayer{position:absolute;inset:0;overflow:hidden;line-height:1;-webkit-text-size-adjust:none;text-size-adjust:none;transform-origin:0 0;z-index:2}
+.textLayer>span,.textLayer>br{color:transparent;position:absolute;white-space:pre;cursor:text;transform-origin:0 0}
+.textLayer span span{color:transparent}
+.textLayer ::selection{background:rgba(40,100,255,.3)}
+#pdfView canvas{background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.18)}
 #reader.pdfpage #page{overflow:hidden;touch-action:manipulation}
 #text p.h{font-weight:700;font-size:1.18em;padding:.9em 0 .5em;break-after:avoid}
 #text p.img{padding:.4em 0;break-inside:avoid;text-align:center}
@@ -221,7 +235,10 @@ button{cursor:pointer}
 .eink .hl-y{background:#FFE600}.eink .hl-g{background:#7CFF7C}.eink .hl-b{background:#8FC3FF}.eink .hl-p{background:#FF9AD0}
 .eink #text mark.find{background:#000;color:#FFF}
 .eink #rbot input[type=range]{accent-color:#000}
+.eink .row .bar{background:#FFF;border:1px solid #000;height:6px}
 .eink .row .bar i{background:#000}
+.eink #rbot .st{opacity:1}
+.eink .pdfpg canvas{box-shadow:none}
 .eink .chips button[aria-pressed=true],.eink .tabs button[aria-selected=true]{background:#000;color:#FFF}
 </style>
 </head>
@@ -300,6 +317,8 @@ button{cursor:pointer}
 <div class="scrim" id="styleScrim" hidden></div>
 <div class="sheet" id="styleSheet" role="dialog" aria-label="보기 설정" hidden>
   <div class="grab"></div>
+  <div class="field"><span class="lbl">보기 설정 적용 범위</span><div class="chips" id="syncChips">
+    <button data-sync="1">모든 기기 공통</button><button data-sync="0">현재 사용하는 기기만 적용</button></div></div>
   <div class="field" id="pdfField" hidden><span class="lbl">PDF 보기 (이 책만)</span><div class="chips" id="pdfChips">
     <button data-pdf="page">원본 페이지</button><button data-pdf="text">글자만(TXT처럼)</button></div></div>
   <div class="field"><span class="lbl">넘기는 방식</span><div class="chips" id="modeChips">
@@ -312,13 +331,18 @@ button{cursor:pointer}
     <span class="lbl" style="margin-top:6px">흰 바탕·검은 글자 고정, 화면 효과·반투명·그림자 제거, 대비 강화</span></div>
   <div class="field"><span class="lbl">글자 굵기</span><div class="chips" id="weightChips">
     <button data-w="400">보통</button><button data-w="500">약간 굵게</button><button data-w="600">굵게</button><button data-w="700">아주 굵게</button></div></div>
-  <div class="field"><span class="lbl">글꼴</span><div class="chips" id="fontChips"></div></div>
+  <div class="field"><span class="lbl">글꼴</span><div class="chips" id="fontChips"></div>
+    <input type="file" id="fontInput" accept=".ttf,.otf,.woff,.woff2" hidden>
+    <div id="ufList" style="margin-top:8px"></div>
+    <span class="lbl" style="margin-top:6px">내 글꼴은 저장소에 보관되어 모든 기기에서 사용. 글꼴 사용권(라이선스)은 직접 확인하세요.</span></div>
   <div class="field"><span class="lbl">글자 크기</span>
     <div class="step"><button data-k="size" data-d="-1" aria-label="작게">−</button><output id="o-size"></output><button data-k="size" data-d="1" aria-label="크게">+</button></div></div>
   <div class="field"><span class="lbl">줄 간격</span>
     <div class="step"><button data-k="lh" data-d="-0.1" aria-label="좁게">−</button><output id="o-lh"></output><button data-k="lh" data-d="0.1" aria-label="넓게">+</button></div></div>
   <div class="field"><span class="lbl">좌우 여백</span>
     <div class="step"><button data-k="margin" data-d="-4" aria-label="좁게">−</button><output id="o-margin"></output><button data-k="margin" data-d="4" aria-label="넓게">+</button></div></div>
+  <div class="field"><span class="lbl">위아래 여백</span>
+    <div class="step"><button data-k="vmargin" data-d="-4" aria-label="좁게">−</button><output id="o-vmargin"></output><button data-k="vmargin" data-d="4" aria-label="넓게">+</button></div></div>
   <div class="field"><span class="lbl">바탕과 글자색</span>
     <div class="swatches" id="themeSw"></div>
     <div class="colors">
@@ -447,12 +471,14 @@ const THEMES = [
   { name: '회색', bg: '#E6E7E3', fg: '#25272A' },
   { name: '연두', bg: '#DDE8D8', fg: '#1F2E1C' },
   { name: '밤', bg: '#16191E', fg: '#B8BCB4' },
-  { name: '먹', bg: '#000000', fg: '#8F8F8F' }
+  { name: '먹', bg: '#000000', fg: '#8F8F8F' },
+  { name: '눈 편한 낮', bg: '#F3EAD3', fg: '#4B3F2F' },
+  { name: '눈 편한 밤', bg: '#22201C', fg: '#BFB39B' }
 ];
 const NIGHT = { bg: '#16191E', fg: '#B8BCB4' };
 const DEF = { font: 'NotoSerifKR', size: 19, lh: 1.8, margin: 22, bg: '#FFFFFF', fg: '#1F1F1F', tap: true, mode: 'page',
-  axis: 'x', spread: false, dark: 'off', darkFrom: '19:00', darkTo: '07:00', weight: 400, t: 0 };
-const LIM = { size: [12, 36], lh: [1.3, 2.6], margin: [8, 48] };
+  axis: 'x', spread: false, dark: 'off', darkFrom: '19:00', darkTo: '07:00', weight: 400, vmargin: 0, t: 0 };
+const LIM = { size: [12, 36], lh: [1.3, 2.6], margin: [8, 48], vmargin: [0, 80] };
 
 const S = {
   token: LS.get('token', ''),
@@ -466,7 +492,7 @@ const S = {
   book: null, first: 0, last: -1, openSeq: 0, pdfCur: 0
 };
 if (!S.prog.notes) S.prog.notes = {};
-S.local = Object.assign({ eink: false }, LS.get('local', {}));
+S.local = Object.assign({ eink: false, syncSet: true }, LS.get('local', {}));
 if (S.local.weight && S.set.weight === 400 && S.local.weight !== 400) S.set.weight = S.local.weight;   // 이전 버전 값 이전
 delete S.local.weight;
 S.nav[0] = { id: '', name: '저장소' };
@@ -714,8 +740,9 @@ function show(id) {
 }
 /* 노치·상태바 영역 색: 페이지 바탕(html·body)과 theme-color를 현재 화면 색으로 항상 함께 맞춤 */
 function syncChrome() {
-  const reader = !$('#reader').hidden;
-  const bg = reader ? colors().bg : getComputedStyle(document.documentElement).getPropertyValue('--paper').trim();
+  const reader = !$('#reader').hidden, app = document.documentElement.classList.contains('standalone');
+  const paper = getComputedStyle(document.documentElement).getPropertyValue('--paper').trim();
+  const bg = reader && app ? colors().bg : paper;   // 브라우저에서는 상·하단에 테마색을 쓰지 않음
   document.documentElement.style.backgroundColor = bg;
   document.body.style.backgroundColor = bg;
   const old = document.querySelector('meta[name=theme-color]');
@@ -1067,6 +1094,7 @@ function fillBlock(p, i) {
   }
 }
 function refreshVisible() {
+  if (S.book && !isFlow()) { paintPdfMarks(); return; }
   if (!S.book || !isFlow()) return;
   for (const p of textEl.querySelectorAll('p[data-i]')) fillBlock(p, +p.dataset.i);
 }
@@ -1108,7 +1136,16 @@ function layoutPaged() {
 const pageCount = () => Math.max(1, Math.ceil((textEl.scrollWidth - 2) / PG.W));
 const curPage = () => S.pageIdx || 0;
 const setPage = i => { S.pageIdx = i; textEl.style.transform = 'translateX(' + (-i * PG.W) + 'px)'; };
-function renderPagedChunk(k) { setPage(0); textEl.textContent = ''; S.first = S.last = k; textEl.appendChild(chunkEl(k)); }
+/* 페이지 모드는 블록을 끊김 없이 이어 붙여 배치 → 묶음 경계에서 쪽이 덜 차는 문제 없음 */
+function blockEls(a, b) {
+  const f = document.createDocumentFragment();
+  for (let i = a; i < b; i++) { const p = document.createElement('p'); p.dataset.i = i; fillBlock(p, i); f.appendChild(p); }
+  return f;
+}
+function renderPagedFrom(i) { setPage(0); textEl.textContent = ''; S.fStart = S.fEnd = i; appendBlocks(); }
+function appendBlocks() { const b = Math.min(units(), S.fEnd + CHP); textEl.appendChild(blockEls(S.fEnd, b)); S.fEnd = b; }
+function prependBlocks() { const a = Math.max(0, S.fStart - CHP); textEl.insertBefore(blockEls(a, S.fStart), textEl.firstChild); S.fStart = a; }
+const colOf = el => { const q = [...el.getClientRects()].find(r => r.height > 0); return q ? Math.max(0, Math.floor((q.left - textEl.getBoundingClientRect().left + 2) / PG.W)) : 0; };
 function renderAround(k) {
   const n = Math.ceil(units() / CH);
   textEl.textContent = '';
@@ -1170,7 +1207,7 @@ function goTo(i, f) {
   if (!isFlow()) { S.pdfCur = i; renderPdf(); updatePct(pctOf(i)); updateBm(); return; }
   layoutPaged();
   if (paged()) {
-    renderPagedChunk(Math.floor(i / CHP));
+    renderPagedFrom(i);
     const p = textEl.querySelector('p[data-i="' + i + '"]');
     if (p) {
       const rects = [...p.getClientRects()].filter(q => q.height > 0);
@@ -1196,16 +1233,23 @@ function turn(d) {
     if (nx < 0) { if (S.pdfCur === 0) return; nx = 0; }
     S.pdfCur = nx; renderPdf();
   } else {
-    const nk = Math.ceil(units() / CHP);
-    let idx = curPage() + d;
-    if (idx >= pageCount()) {
-      if (S.first >= nk - 1) { toast('마지막 페이지입니다.'); return; }
-      renderPagedChunk(S.first + 1); idx = 0;
-    } else if (idx < 0) {
-      if (S.first <= 0) return;
-      renderPagedChunk(S.first - 1); idx = pageCount() - 1;
+    if (d > 0) {
+      // 화면에 쌓인 블록이 많아지면, 쪽 맨 위가 문단 시작인 지점에서 다시 그려 가볍게 유지(배치 동일)
+      if (S.fEnd - S.fStart > CHP * 4) { const g = getPos(); if (g && g.f === 0 && g.i > S.fStart) renderPagedFrom(g.i); }
+      if (curPage() + 1 >= pageCount() - 1 && S.fEnd < units()) appendBlocks();
+      const idx = curPage() + 1;
+      if (idx >= pageCount()) { toast('마지막 페이지입니다.'); return; }
+      setPage(idx);
+    } else {
+      let idx = curPage() - 1;
+      if (idx < 0) {
+        if (S.fStart <= 0) return;
+        const top = S.fStart; prependBlocks();
+        const p = textEl.querySelector('p[data-i="' + top + '"]');
+        idx = p ? Math.max(0, colOf(p) - 1) : 0;
+      }
+      setPage(idx);
     }
-    setPage(idx);
   }
   S.book.moved = true;
   const p = getPos(); if (p) updatePct(pctOf(p.i));
@@ -1234,10 +1278,50 @@ async function renderPdf() {
     c.style.width = Math.floor(vp.width / dpr) + 'px'; c.style.height = Math.floor(vp.height / dpr) + 'px';
     await pg.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
     if (seq !== pdfSeq) return;
-    out.push(c);
+    const wrap = document.createElement('div'); wrap.className = 'pdfpg'; wrap.dataset.pg = k;
+    wrap.style.width = c.style.width; wrap.style.height = c.style.height; wrap.appendChild(c);
+    // 글자가 들어 있는 PDF(OCR 포함)는 투명 글자층을 겹쳐 선택·하이라이트·메모 가능
+    try {
+      const tc = await pg.getTextContent();
+      if (tc.items.some(x => (x.str || '').trim())) {
+        const tl = document.createElement('div'); tl.className = 'textLayer'; tl.style.setProperty('--scale-factor', sc);
+        const divs = [];
+        await window.pdfjsLib.renderTextLayer({ textContentSource: tc, container: tl, viewport: pg.getViewport({ scale: sc }), textDivs: divs }).promise;
+        divs.forEach((d, j) => { d.dataset.k = j; d.dataset.t = d.textContent; });
+        wrap.appendChild(tl);
+      }
+    } catch {}
+    if (seq !== pdfSeq) return;
+    out.push(wrap);
   }
   pdfView.replaceChildren(...out);
   pdfView.classList.toggle('inv', isDark(colors().bg));
+  paintPdfMarks();
+}
+/* 원본 페이지 하이라이트: 글자층 조각(data-k) 안에서 글자 위치로 표시 */
+function paintPdfMarks() {
+  if (!S.book || isFlow()) return;
+  const items = notesOf(S.book.id).filter(it => it.type === 'hl' && it.pm === 'page');
+  for (const wrap of pdfView.querySelectorAll('.pdfpg')) {
+    const pg = +wrap.dataset.pg, mine = items.filter(it => it.pg === pg);
+    for (const d of wrap.querySelectorAll('.textLayer>span[data-k]')) {
+      const k = +d.dataset.k, text = d.dataset.t || '';
+      const segs = [];
+      for (const it of mine) if (k >= it.s.i && k <= it.e.i) {
+        const a = k === it.s.i ? it.s.o : 0, b = k === it.e.i ? it.e.o : text.length;
+        if (b > a) segs.push({ s: a, e: b, cls: 'hl hl-' + it.c + (it.memo ? ' memo' : ''), id: it.id });
+      }
+      if (!segs.length) { if (d.childElementCount) d.textContent = text; continue; }
+      d.textContent = '';
+      const cuts = [...new Set([0, text.length, ...segs.flatMap(g => [g.s, g.e])])].sort((x, y) => x - y);
+      for (let q = 0; q < cuts.length - 1; q++) {
+        const a = cuts[q], b = cuts[q + 1]; if (a === b) continue;
+        const top = segs.filter(g => g.s <= a && g.e >= b).pop(), piece = text.slice(a, b);
+        if (!top) { d.appendChild(document.createTextNode(piece)); continue; }
+        const sp = document.createElement('span'); sp.className = top.cls; sp.dataset.hl = top.id; sp.textContent = piece; d.appendChild(sp);
+      }
+    }
+  }
 }
 
 /* ---------- 위치 기록 ---------- */
@@ -1630,7 +1714,7 @@ function saveNote(it) {
 }
 /* 다른 보기(PDF 원본/글자)에서 만든 항목의 위치 변환 */
 function noteIdx(it) {
-  const i = it.type === 'hl' ? it.s.i : it.i;
+  const i = it.type === 'hl' ? (it.pm === 'page' ? it.pg : it.s.i) : it.i;
   if (it.pm === curPm()) return i;
   if (it.pg == null) return i;
   return isFlow() ? (S.book.pageStart ? S.book.pageStart[Math.min(it.pg, S.book.pageStart.length - 1)] : 0) : it.pg;
@@ -1666,8 +1750,20 @@ function offIn(p, node, off) {
   if (node === p) { let n = 0; for (let k = 0; k < off; k++) n += p.childNodes[k].textContent.length; return n; }
   const rg = document.createRange(); rg.setStart(p, 0); rg.setEnd(node, off); return rg.toString().length;
 }
+function selInfoPdf(sel) {
+  const r = sel.getRangeAt(0);
+  const sp = n => { const el = n && (n.nodeType === 1 ? n : n.parentElement); return el ? el.closest('.textLayer>span[data-k]') : null; };
+  const a = sp(r.startContainer), b = sp(r.endContainer);
+  if (!a || !b) return null;
+  const wa = a.closest('.pdfpg'), wb = b.closest('.pdfpg');
+  if (!wa || wa !== wb) return null;   // 한 쪽 안에서만
+  const s = { i: +a.dataset.k, o: offIn(a, r.startContainer, r.startOffset) }, e = { i: +b.dataset.k, o: offIn(b, r.endContainer, r.endOffset) };
+  if (e.i < s.i || (e.i === s.i && e.o <= s.o)) return null;
+  return { s, e, pg: +wa.dataset.pg, text: String(sel).replace(/\s+/g, ' ').trim().slice(0, 500), rect: r.getBoundingClientRect() };
+}
 function selInfo() {
   const sel = getSelection();
+  if (S.book && !isFlow() && sel && !sel.isCollapsed && sel.rangeCount) return selInfoPdf(sel);
   if (!S.book || !isFlow() || !sel || sel.isCollapsed || !sel.rangeCount) return null;
   const r = sel.getRangeAt(0), pa = nodeP(r.startContainer), pb = nodeP(r.endContainer);
   if (!pa || !pb || !textEl.contains(pa) || !textEl.contains(pb)) return null;
@@ -1696,8 +1792,9 @@ selBar.addEventListener('pointerdown', e => e.preventDefault());
 selBar.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || !lastSel) return;
   const si = lastSel; lastSel = null;
+  const pdfPage = !isFlow();
   const it = { id: newId(), type: 'hl', s: si.s, e: si.e, c: b.dataset.c === 'memo' ? 'y' : b.dataset.c, text: si.text, memo: '',
-    pm: curPm(), pg: curPg(si.s.i), pct: +pctOf(si.s.i).toFixed(1) };
+    pm: curPm(), pg: pdfPage ? si.pg : curPg(si.s.i), pct: +pctOf(pdfPage ? si.pg : si.s.i).toFixed(1) };
   getSelection().removeAllRanges(); hideSelBar();
   saveNote(it);
   if (b.dataset.c === 'memo') openNote(it);
@@ -1787,11 +1884,12 @@ page.addEventListener('click', e => {
   const R = $('#reader');
   if (!R.classList.contains('hide-chrome')) { R.classList.add('hide-chrome'); return; }
   const rc = page.getBoundingClientRect();
-  const tap = turnable() || S.set.tap;
-  const pos = S.set.axis === 'y' ? (e.clientY - rc.top) / rc.height : (e.clientX - rc.left) / rc.width;
-  if (tap && pos < 0.3) pageBy(-1);
-  else if (tap && pos > 0.7) pageBy(1);
-  else R.classList.remove('hide-chrome');
+  const x = (e.clientX - rc.left) / rc.width, y = (e.clientY - rc.top) / rc.height;
+  // 가운데 섬(가로 40%·세로 30%)만 메뉴, 나머지는 섬을 감싸는 ㄷ자 두 영역으로 앞·뒤 넘김
+  const iw = Math.max(0.4, 150 / rc.width) / 2, ih = Math.max(0.3, 150 / rc.height) / 2;
+  if (Math.abs(x - 0.5) <= iw && Math.abs(y - 0.5) <= ih) { R.classList.remove('hide-chrome'); return; }
+  if (!(turnable() || S.set.tap)) return;
+  pageBy((S.set.axis === 'y' ? y : x) < 0.5 ? -1 : 1);
 });
 document.addEventListener('keydown', e => {
   if ($('#reader').hidden || !S.book || /INPUT|TEXTAREA/.test(e.target.tagName)) return;
@@ -1804,12 +1902,47 @@ document.addEventListener('keydown', e => {
 });
 
 /* ---------- 보기 설정 ---------- */
-function fontById(id) { return FONTS.find(f => f.id === id) || FONTS[0]; }
+const UF_DIR = '.novelreader/fonts';
+S.userFonts = LS.get('userFonts', []);
+const ufFamily = name => 'UF-' + [...name].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7).toString(36);
+function fontById(id) {
+  if (id && id.startsWith('u:')) { const n = id.slice(2); return { id, name: n.replace(/\.(ttf|otf|woff2?)$/i, ''), user: n, stack: '"' + ufFamily(n) + '",system-ui,sans-serif' }; }
+  return FONTS.find(f => f.id === id) || FONTS[0];
+}
+async function listUserFonts() {
+  try {
+    const items = await gh('GET', contents(UF_DIR));
+    S.userFonts = (Array.isArray(items) ? items : []).filter(x => x.type === 'file' && /\.(ttf|otf|woff2?)$/i.test(x.name)).map(x => ({ name: x.name, sha: x.sha, size: x.size }));
+  } catch (e) { if (e instanceof ApiErr && e.status === 404) S.userFonts = []; }
+  LS.set('userFonts', S.userFonts); renderFontChips();
+}
+const loadedUF = {};
+async function loadUserFont(name) {
+  if (loadedUF[name]) return loadedUF[name];
+  const info = S.userFonts.find(f => f.name === name), key = S.repo + '|font|' + name;
+  let buf = null;
+  try { const c = await IDB.get(key); if (c && (!info || c.sha === info.sha)) buf = c.buf; } catch {}
+  if (!buf) {
+    buf = await gh('GET', contents(UF_DIR + '/' + name), { accept: 'application/vnd.github.raw+json', raw: true });
+    try { await IDB.put({ key, sha: info ? info.sha : '', buf }); } catch {}
+  }
+  const ff = new FontFace(ufFamily(name), buf); await ff.load(); document.fonts.add(ff);
+  return (loadedUF[name] = true);
+}
+function renderFontChips() {
+  $('#fontChips').innerHTML = FONTS.map(f => `<button data-font="${f.id}">${f.name}</button>`).join('') +
+    S.userFonts.map(f => `<button data-font="u:${esc(f.name)}">${esc(f.name.replace(/\.(ttf|otf|woff2?)$/i, ''))}</button>`).join('') +
+    '<button data-font="+">＋ 내 글꼴 추가</button>';
+  $('#ufList').innerHTML = S.userFonts.map(f => `<div class="cache-row"><span class="n">${esc(f.name)}</span><span class="s">${fmtSize(f.size || 0)}</span><button data-ufdel="${esc(f.name)}">삭제</button></div>`).join('');
+  for (const b of $('#fontChips').children) b.setAttribute('aria-pressed', b.dataset.font === S.set.font);
+}
 const FONT_W = { NotoSerifKR: [400, 500, 600, 700], NotoSansKR: [400, 500, 600, 700], Hahmlet: [400, 500, 600, 700],
   NanumMyeongjo: [400, 700, 800], NanumGothic: [400, 700, 800], GowunBatang: [400, 700] };
 const fontWeight = id => { const ws = FONT_W[id] || [400, 700], w = S.set.weight || 400; return ws.find(x => x >= w) || ws[ws.length - 1]; };
 async function ensureFont(id) {
-  const f = fontById(id); if (!f.g) return;
+  const f = fontById(id);
+  if (f.user) { try { await loadUserFont(f.user); } catch { toast('내 글꼴을 불러오지 못했습니다. 기본 글꼴로 표시합니다.'); } return; }
+  if (!f.g) return;
   const w = fontWeight(id), ws = [...new Set([400, w, 700].filter(x => (FONT_W[id] || [400, 700]).includes(x)))].sort((a, b) => a - b);
   const lid = 'font-' + f.id + '-' + ws.join('-');
   if (!document.getElementById(lid)) {
@@ -1841,12 +1974,13 @@ function applySettings() {
   R.setProperty('--rfont', fontById(s.font).stack);
   R.setProperty('--rsize', s.size + 'px'); R.setProperty('--rlh', s.lh);
   R.setProperty('--rmargin', s.margin + 'px');
+  R.setProperty('--rvmargin', (s.vmargin || 0) + 'px');
   R.setProperty('--rweight', (s.weight || 400) > 400 ? fontWeight(s.font) : 400);
   document.documentElement.classList.toggle('eink', !!S.local.eink);
   $('#einkToggle').checked = !!S.local.eink;
   for (const b of $('#weightChips').children) b.setAttribute('aria-pressed', +b.dataset.w === (s.weight || 400));
   syncChrome();
-  $('#o-size').textContent = s.size + 'px'; $('#o-lh').textContent = s.lh.toFixed(1); $('#o-margin').textContent = s.margin + 'px';
+  $('#o-size').textContent = s.size + 'px'; $('#o-lh').textContent = s.lh.toFixed(1); $('#o-margin').textContent = s.margin + 'px'; $('#o-vmargin').textContent = (s.vmargin || 0) + 'px';
   $('#bgPick').value = s.bg; $('#fgPick').value = s.fg;
   $('#tapToggle').checked = !!s.tap; $('#spreadToggle').checked = !!s.spread;
   $('#tapField').hidden = paged();
@@ -1854,7 +1988,7 @@ function applySettings() {
   $('#darkFrom').value = s.darkFrom; $('#darkTo').value = s.darkTo;
   const press = (sel, attr, val) => { for (const b of $(sel).children) b.setAttribute('aria-pressed', b.dataset[attr] === val); };
   press('#modeChips', 'mode', paged() ? 'page' : 'scroll'); press('#axisChips', 'axis', s.axis); press('#darkChips', 'dark', s.dark);
-  press('#fontChips', 'font', s.font);
+  press('#fontChips', 'font', s.font); press('#syncChips', 'sync', S.local.syncSet ? '1' : '0');
   for (const b of $('#themeSw').children) b.setAttribute('aria-pressed', b.dataset.bg === s.bg && b.dataset.fg === s.fg);
   if (S.book && !S.book.loading) applyView();
   if (S.book && S.book.pdf && !isFlow()) pdfView.classList.toggle('inv', isDark(c.bg));
@@ -1870,24 +2004,60 @@ async function changeSetting(patch) {
   const keep = S.book && !S.book.loading ? getPos() : null;
   Object.assign(S.set, patch, { t: Date.now() });
   LS.set('settings', S.set);
-  S.prog.settings = Object.assign({}, S.set); LS.set('prog', S.prog); markDirty();
+  if (S.local.syncSet) { S.prog.settings = Object.assign({}, S.set); LS.set('prog', S.prog); markDirty(); }
   if (patch.font || patch.weight) await ensureFont(S.set.font);
   applySettings();
   if (keep) requestAnimationFrame(() => goTo(keep.i, keep.f));
 }
 function applyRemoteSettings() {
   const r = S.prog.settings;
-  if (!r || (r.t || 0) <= (S.set.t || 0)) return;
+  if (!S.local.syncSet || !r || (r.t || 0) <= (S.set.t || 0)) return;
   const keep = S.book && !S.book.loading ? getPos() : null;
   S.set = Object.assign({}, DEF, r); LS.set('settings', S.set);
   ensureFont(S.set.font).then(() => { applySettings(); if (keep) goTo(keep.i, keep.f); });
 }
-$('#fontChips').innerHTML = FONTS.map(f => `<button data-font="${f.id}">${f.name}</button>`).join('');
+renderFontChips();
 $('#themeSw').innerHTML = THEMES.map(t => `<button data-bg="${t.bg}" data-fg="${t.fg}" style="background:${t.bg};color:${t.fg}" aria-label="${t.name}">가</button>`).join('');
 const chip = (sel, fn) => { $(sel).onclick = e => { const b = e.target.closest('button'); if (b) fn(b); }; };
-chip('#fontChips', b => changeSetting({ font: b.dataset.font }));
+chip('#fontChips', b => { if (b.dataset.font === '+') $('#fontInput').click(); else changeSetting({ font: b.dataset.font }); });
+$('#fontInput').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  if (!/\.(ttf|otf|woff2?)$/i.test(f.name)) { toast('TTF·OTF·WOFF·WOFF2 글꼴만 올릴 수 있습니다.'); return; }
+  if (f.size > MAX_UP) { toast('100MB 이하 글꼴만 올릴 수 있습니다.'); return; }
+  const name = f.name.replace(/[\\/:*?"<>|]/g, '_');
+  toast('글꼴을 확인하는 중…');
+  try { const t = new FontFace('UFcheck', await f.arrayBuffer()); await t.load(); }
+  catch { toast('글꼴 파일을 읽을 수 없습니다.'); return; }
+  toast('글꼴을 올리는 중…');
+  try {
+    const sha = await uploadBlob(f);
+    await commitTree([{ path: UF_DIR + '/' + name, sha }], '글꼴 추가: ' + name);
+    delete loadedUF[name];
+    await listUserFonts();
+    await changeSetting({ font: 'u:' + name });
+    toast('글꼴을 추가했습니다. 모든 기기에서 쓸 수 있습니다.');
+  } catch (err) { if (!onAuthFail(err)) toast(errMsg(err)); }
+};
+$('#ufList').onclick = async e => {
+  const b = e.target.closest('button[data-ufdel]'); if (!b) return;
+  const name = b.dataset.ufdel;
+  if (!confirm('"' + name + '" 글꼴을 저장소에서 삭제합니다.')) return;
+  try {
+    await commitTree([{ path: UF_DIR + '/' + name, sha: null }], '글꼴 삭제: ' + name);
+    try { await IDB.del(S.repo + '|font|' + name); } catch {}
+    if (S.set.font === 'u:' + name) await changeSetting({ font: DEF.font });
+    await listUserFonts(); toast('글꼴을 삭제했습니다.');
+  } catch (err) { if (!onAuthFail(err)) toast(errMsg(err)); }
+};
 chip('#themeSw', b => changeSetting({ bg: b.dataset.bg, fg: b.dataset.fg }));
 chip('#modeChips', b => changeSetting({ mode: b.dataset.mode }));
+chip('#syncChips', b => {
+  const on = b.dataset.sync === '1'; if (on === !!S.local.syncSet) return;
+  S.local.syncSet = on; LS.set('local', S.local);
+  if (on) { S.set.t = Date.now(); LS.set('settings', S.set); S.prog.settings = Object.assign({}, S.set); LS.set('prog', S.prog); markDirty(); pushSoon(); toast('이 기기의 보기 설정을 모든 기기에 적용합니다.'); }
+  else toast('이제 보기 설정은 이 기기에만 적용됩니다.');
+  applySettings();
+});
 chip('#axisChips', b => changeSetting({ axis: b.dataset.axis }));
 chip('#darkChips', b => changeSetting({ dark: b.dataset.dark }));
 chip('#pdfChips', async b => {
@@ -1958,7 +2128,7 @@ for (const n of SHEETS) {
 }
 const openSheets = () => SHEETS.filter(n => !$('#' + n + 'Sheet').hidden);
 for (const n of SHEETS) $('#' + n + 'Scrim').onclick = closeSheets;
-$('#styleBtn').onclick = () => openSheet('style');
+$('#styleBtn').onclick = () => { openSheet('style'); listUserFonts(); };
 $('#accountBtn').onclick = () => {
   const n = Object.values(S.prog.files || {}).filter(r => !r.del).length;
   $('#accInfo').textContent = `저장소 ${S.repo}의 ${PROG_PATH} 파일에 읽던 위치 ${n}건, 북마크·하이라이트·메모, 보기 설정을 저장합니다. ` +
