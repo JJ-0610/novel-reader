@@ -1,4 +1,4 @@
-const V = 'viewer-v10';
+const V = 'viewer-v11';
 const SHARE = 'viewer-share';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 self.addEventListener('install', e => {

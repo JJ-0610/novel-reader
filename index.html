@@ -9,17 +9,30 @@
   var sa = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
   document.documentElement.classList.toggle('standalone', !!sa);
   if (!sa) document.querySelector('meta[name=viewport]').content = 'width=device-width, initial-scale=1';
+  window.__early = function () {
+    try {
+      var st = JSON.parse(localStorage.getItem('nr.settings') || '{}'), lo = JSON.parse(localStorage.getItem('nr.local') || '{}');
+      var bg = st.bg || '#FFFFFF', dark = function (h) { h = h.replace('#', ''); var n = parseInt(h, 16); return ((n >> 16 & 255) * .299 + (n >> 8 & 255) * .587 + (n & 255) * .114) < 128; };
+      var night = false;
+      if (st.dark === 'system') night = matchMedia('(prefers-color-scheme: dark)').matches;
+      if (st.dark === 'time') { var tm = function (x) { x = (x || '0:0').split(':'); return (+x[0] || 0) * 60 + (+x[1] || 0); }, a = tm(st.darkFrom), b = tm(st.darkTo), d = new Date(), c = d.getHours() * 60 + d.getMinutes(); night = a !== b && (a < b ? c >= a && c < b : c >= a || c < b); }
+      if (lo.eink) bg = '#FFFFFF'; else if (night && !dark(bg)) bg = '#16191E';
+      return bg;
+    } catch (e) { return '#FFFFFF'; }
+  };
+  if (sa) { var bg = window.__early(); document.querySelector('meta[name=theme-color]') ? 0 : 0; document.documentElement.style.backgroundColor = bg; window.__earlyBg = bg; }
 })();
 </script>
 <title>Viewer</title>
 <meta name="theme-color" content="#FAFAF7">
+<script>if (window.__earlyBg) document.querySelector('meta[name=theme-color]').content = window.__earlyBg;</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Viewer">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="icon" href="icon-192.png">
+<link rel="icon" id="fav" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&display=swap" id="font-NotoSerifKR">
@@ -220,7 +233,39 @@ button{cursor:pointer}
 .tm{display:flex;gap:10px;align-items:center;margin-top:10px;font-size:14px}
 .tm input{width:auto!important;padding:6px 8px!important}
 @media (prefers-reduced-motion:reduce){ .chrome{transition:none} #syncBtn.busy svg{animation:none;opacity:.4} }
+/* ---- 화면 스타일 ---- */
+#text{max-width:var(--rmaxw,44em)}
+#reader.skin-chat,#reader.skin-doc{display:grid}
+#reader.skin-chat{grid-template-columns:260px 1fr;grid-template-rows:1fr auto}
+#reader.skin-chat #skinSide{grid-row:1/3;grid-column:1;overflow-y:auto;padding:calc(var(--sat) + 12px) 10px 12px;
+  background:color-mix(in srgb,var(--rbg) 94%,var(--rfg));border-right:1px solid color-mix(in srgb,var(--rfg) 10%,transparent);font-family:var(--ui)}
+#reader.skin-chat #page{grid-row:1;grid-column:2}
+#reader.skin-chat #skinInput{grid-row:2;grid-column:2;padding:10px 18% calc(var(--sab) + 14px);font-family:var(--ui)}
+#skinSide button{display:block;width:100%;text-align:left;border:0;background:transparent;color:var(--rfg);border-radius:10px;padding:9px 12px;font-size:14px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#skinSide button.cur{background:color-mix(in srgb,var(--rfg) 10%,transparent);font-weight:600}
+#skinNew{margin-bottom:10px;border:1px solid color-mix(in srgb,var(--rfg) 18%,transparent)!important}
+#skinInput{display:flex;align-items:center;gap:10px}
+#skinInput input{flex:1;border:1px solid color-mix(in srgb,var(--rfg) 20%,transparent);background:color-mix(in srgb,var(--rbg) 92%,var(--rfg));color:var(--rfg);
+  border-radius:24px;padding:13px 20px;font-size:15px}
+#skinStatus{font-size:12px;opacity:.6;font-variant-numeric:tabular-nums}
+#reader.skin-doc{grid-template-rows:auto 1fr auto}
+#reader.skin-doc #skinBar{grid-row:1;display:flex;align-items:center;gap:6px;padding:calc(var(--sat) + 8px) 14px 8px;font-family:var(--ui);font-size:14px;
+  background:color-mix(in srgb,var(--rbg) 90%,var(--rfg));border-bottom:1px solid color-mix(in srgb,var(--rfg) 12%,transparent)}
+#skinDocName{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+#skinBar button{border:1px solid color-mix(in srgb,var(--rfg) 18%,transparent);background:transparent;color:var(--rfg);border-radius:6px;padding:5px 10px;font-size:13px}
+#reader.skin-doc #page{grid-row:2;background:color-mix(in srgb,var(--rbg) 82%,var(--rfg))}
+#reader.skin-doc #skinInput{grid-row:3;padding:4px 14px calc(var(--sab) + 4px);background:color-mix(in srgb,var(--rbg) 90%,var(--rfg));font-family:var(--ui)}
+#reader.skin-doc #skinInput input{display:none}
+.paper{position:absolute;z-index:0;background:var(--rbg);box-shadow:0 1px 4px rgba(0,0,0,.18)}
+#reader.skin-doc #text{position:relative;z-index:1}
+#reader.skin-doc:not(.paged) #text{background:var(--rbg);box-shadow:0 1px 4px rgba(0,0,0,.18);margin:16px auto}
+@media (max-width:899px){ #reader.skin-chat{grid-template-columns:1fr} #reader.skin-chat #skinSide{display:none} #reader.skin-chat #page,#reader.skin-chat #skinInput{grid-column:1} #reader.skin-chat #skinInput{padding:8px 12px calc(var(--sab) + 10px)} }
 /* 전자잉크: 대비 최대, 잔상 유발 효과 제거 */
+:root.themed{--paper:var(--tbg);--ink:var(--tfg);--card:color-mix(in srgb,var(--tbg) 93%,var(--tfg));
+  --line:color-mix(in srgb,var(--tfg) 18%,var(--tbg));--mute:color-mix(in srgb,var(--tfg) 62%,var(--tbg));
+  --accent:var(--tfg);--accent-ink:var(--tbg);--warn:color-mix(in srgb,#C0392B 70%,var(--tfg))}
+:root.themed.tdark{color-scheme:dark}
 :root.eink{--paper:#FFFFFF;--ink:#000000;--mute:#000000;--line:#000000;--card:#FFFFFF;--accent:#000000;--accent-ink:#FFFFFF;--warn:#000000;color-scheme:light}
 .eink *{transition:none!important;animation:none!important;box-shadow:none!important;text-shadow:none!important}
 .eink .chrome{background:var(--rbg)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-color:#000!important;border-width:2px!important}
@@ -284,7 +329,10 @@ button{cursor:pointer}
 
 <!-- 리더 -->
 <section id="reader" class="screen hide-chrome" hidden>
-  <div id="page" tabindex="0"><div id="text"></div><div id="pdfView" hidden></div></div>
+  <aside id="skinSide" hidden><button id="skinNew">＋ 새 항목</button><div id="skinList"></div></aside>
+  <div id="skinBar" hidden><span id="skinDocName"></span><button data-act="smaller" aria-label="글자 작게">가−</button><button data-act="bigger" aria-label="글자 크게">가+</button><button data-act="find" aria-label="찾기">찾기</button><button data-act="toc" aria-label="목차">목차</button></div>
+  <div id="page" tabindex="0"><div id="paperA" class="paper" hidden></div><div id="paperB" class="paper" hidden></div><div id="text"></div><div id="pdfView" hidden></div></div>
+  <div id="skinInput" hidden><input type="search" id="skinQ" placeholder="메시지를 입력하세요" enterkeyhint="search"><span id="skinStatus"></span></div>
   <div id="loading" hidden></div>
   <header id="rtop" class="chrome">
     <button class="icon-btn" id="backBtn" aria-label="서재로"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
@@ -327,6 +375,15 @@ button{cursor:pointer}
     <button data-axis="x">왼쪽·오른쪽</button><button data-axis="y">위·아래</button></div></div>
   <div class="field" id="tapField"><label class="toggle">스크롤 모드에서도 화면을 눌러 한 화면씩 넘기기 <input type="checkbox" id="tapToggle"></label></div>
   <div class="field"><label class="toggle">넓은 가로 화면에서 2쪽 보기 <input type="checkbox" id="spreadToggle"></label></div>
+  <div class="field"><span class="lbl">화면 스타일 (현재 사용하는 기기만 적용)</span><div class="chips" id="skinChips">
+    <button data-skin="basic">기본</button><button data-skin="chat">대화형</button><button data-skin="doc">문서형</button></div>
+    <span class="lbl" style="margin-top:6px">대화형: 왼쪽 목록(목차)·아래 입력창(검색) 배치 / 문서형: 회색 바탕 위 종이 배치·상단 도구줄</span></div>
+  <div class="field"><span class="lbl">본문 폭 (현재 사용하는 기기만 적용)</span><div class="chips" id="widthChips">
+    <button data-width="normal">보통</button><button data-width="wide">넓게</button><button data-width="max">최대</button></div></div>
+  <div class="field"><span class="lbl">브라우저 탭 이름·아이콘 (현재 사용하는 기기만 적용)</span>
+    <input type="search" id="tabTitle" maxlength="40" placeholder="Viewer">
+    <div class="chips" id="iconChips" style="margin-top:8px">
+      <button data-icon="book">책</button><button data-icon="doc">문서</button><button data-icon="chat">대화</button><button data-icon="sheet">표</button></div></div>
   <div class="field"><label class="toggle">전자잉크 모드 (현재 사용하는 기기만 적용) <input type="checkbox" id="einkToggle"></label>
     <span class="lbl" style="margin-top:6px">흰 바탕·검은 글자 고정, 화면 효과·반투명·그림자 제거, 대비 강화</span></div>
   <div class="field"><span class="lbl">글자 굵기</span><div class="chips" id="weightChips">
@@ -492,7 +549,7 @@ const S = {
   book: null, first: 0, last: -1, openSeq: 0, pdfCur: 0
 };
 if (!S.prog.notes) S.prog.notes = {};
-S.local = Object.assign({ eink: false, syncSet: true }, LS.get('local', {}));
+S.local = Object.assign({ eink: false, syncSet: true, skin: 'basic', width: 'normal', tabTitle: 'Viewer', tabIcon: 'book' }, LS.get('local', {}));
 if (S.local.weight && S.set.weight === 400 && S.local.weight !== 400) S.set.weight = S.local.weight;   // 이전 버전 값 이전
 delete S.local.weight;
 S.nav[0] = { id: '', name: '저장소' };
@@ -738,11 +795,24 @@ function show(id) {
   for (const s of ['setup', 'library', 'reader']) $('#' + s).hidden = s !== id;
   syncChrome();
 }
+const IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+/* 아이폰 홈 화면 앱은 상단 색을 시작 시점에만 반영 → 색이 바뀌면 위치를 저장하고 한 번 다시 열기 */
+let barReloading = false;
+function reloadForBar() {
+  if (barReloading) return; barReloading = true;
+  try { if (S.book && !S.book.loading) { S.book.moved = true; recordPos(); } } catch {}
+  if (!$('#styleSheet').hidden) LS.set('reopenStyle', true);
+  setTimeout(() => location.reload(), 60);
+}
 /* 노치·상태바 영역 색: 페이지 바탕(html·body)과 theme-color를 현재 화면 색으로 항상 함께 맞춤 */
 function syncChrome() {
-  const reader = !$('#reader').hidden, app = document.documentElement.classList.contains('standalone');
-  const paper = getComputedStyle(document.documentElement).getPropertyValue('--paper').trim();
-  const bg = reader && app ? colors().bg : paper;   // 브라우저에서는 상·하단에 테마색을 쓰지 않음
+  const app = document.documentElement.classList.contains('standalone'), c = colors(), R = document.documentElement;
+  // 서재·읽기 화면 모두 같은 테마색
+  R.classList.add('themed'); R.style.setProperty('--tbg', c.bg); R.style.setProperty('--tfg', c.fg); R.classList.toggle('tdark', isDark(c.bg));
+  // 브라우저(사파리)는 상·하단에 테마색을 쓰지 않음, 홈 화면 앱은 테마색
+  const bg = app ? c.bg : (matchMedia('(prefers-color-scheme: dark)').matches ? '#111318' : '#FFFFFF');
+  if (app && S.lastBarBg && S.lastBarBg !== bg && IOS) reloadForBar();
+  S.lastBarBg = bg;
   document.documentElement.style.backgroundColor = bg;
   document.body.style.backgroundColor = bg;
   const old = document.querySelector('meta[name=theme-color]');
@@ -1108,28 +1178,42 @@ function chunkEl(k) {
 /* 페이지 모드: 다단(column) 배치. 2쪽 보기면 화면당 2단 */
 let PG = { W: 1, pm: 0 };
 const spreadOn = () => S.set.spread && page.clientWidth >= 900 && page.clientWidth > page.clientHeight;
+const lineCap = () => ({ normal: 40, wide: 64, max: 1e6 })[S.local.width] || 40;
+/* 문서형: 단(쪽) 뒤에 종이 모양 배치 */
+function placePaper(H) {
+  const on = S.local.skin === 'doc' && isFlow() && paged();
+  for (const [k, el] of [[0, $('#paperA')], [1, $('#paperB')]]) {
+    if (!on || (k === 1 && !PG.two)) { el.hidden = true; continue; }
+    const colW = parseFloat(textEl.style.columnWidth), gap = parseFloat(textEl.style.columnGap);
+    const left = PG.pm + k * (colW + gap) - Math.min(28, PG.pm * .6);
+    el.hidden = false;
+    el.style.left = left + 'px'; el.style.width = (colW + 2 * Math.min(28, PG.pm * .6)) + 'px';
+    el.style.top = '8px'; el.style.height = (H - 16) + 'px';
+  }
+}
 function layoutPaged() {
   const t = textEl.style;
   if (!isFlow() || !paged()) {
     for (const k of ['width', 'height', 'columnWidth', 'columnGap', 'paddingLeft', 'paddingRight', 'transform']) t[k] = '';
-    page.scrollLeft = 0; S.pageIdx = 0; return;
+    page.scrollLeft = 0; S.pageIdx = 0; placePaper(0); return;
   }
   const pr = page.getBoundingClientRect();
   const W = pr.width, H = page.clientHeight;
   page.scrollLeft = 0;
   if (spreadOn()) {
-    const colW = Math.max(200, Math.min(W / 2 - 2 * S.set.margin, Math.round(S.set.size * 34)));
+    const colW = Math.max(200, Math.min(W / 2 - 2 * S.set.margin, Math.round(S.set.size * lineCap() * .85)));
     const g = W / 2 - colW;
     PG = { W, pm: g / 2, two: true };
     t.width = W + 'px'; t.paddingLeft = t.paddingRight = (g / 2) + 'px';
     t.columnWidth = colW + 'px'; t.columnGap = g + 'px';
   } else {
-    const pm = Math.max(S.set.margin, (W - S.set.size * 40) / 2);
+    const pm = Math.max(S.set.margin, (W - S.set.size * lineCap()) / 2);
     PG = { W, pm, two: false };
     t.width = W + 'px'; t.paddingLeft = t.paddingRight = pm + 'px';
     t.columnWidth = (W - 2 * pm) + 'px'; t.columnGap = (2 * pm) + 'px';
   }
   t.height = H + 'px';
+  placePaper(H);
   const cs = getComputedStyle(textEl);
   textEl.style.setProperty('--colh', Math.max(120, H - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 8) + 'px');
 }
@@ -1257,7 +1341,7 @@ function turn(d) {
   clearTimeout(recTimer); recTimer = setTimeout(recordPos, 700);
 }
 const pctOf = i => units() > 1 ? i / (units() - 1) * 100 : 100;
-function updatePct(p) { $('#pct').textContent = p.toFixed(1) + '%'; if (!seeking) $('#seek').value = Math.round(p * 10); }
+function updatePct(p) { $('#pct').textContent = p.toFixed(1) + '%'; if (!seeking) $('#seek').value = Math.round(p * 10); try { skinStatus(); } catch {} }
 
 /* ---------- PDF 원본 페이지 ---------- */
 let pdfSeq = 0;
@@ -1635,7 +1719,7 @@ async function openBook(id, name, sha) {
     }
     B.loading = false;
     $('#loading').hidden = true;
-    applyView(); rebuildMarks();
+    applyView(); rebuildMarks(); renderSkinSide();
     const sp = startPos(rec);
     goTo(sp.i, sp.f);
     page.focus({ preventScroll: true });
@@ -1977,6 +2061,7 @@ function applySettings() {
   R.setProperty('--rvmargin', (s.vmargin || 0) + 'px');
   R.setProperty('--rweight', (s.weight || 400) > 400 ? fontWeight(s.font) : 400);
   document.documentElement.classList.toggle('eink', !!S.local.eink);
+  applySkin();
   $('#einkToggle').checked = !!S.local.eink;
   for (const b of $('#weightChips').children) b.setAttribute('aria-pressed', +b.dataset.w === (s.weight || 400));
   syncChrome();
@@ -1993,6 +2078,50 @@ function applySettings() {
   if (S.book && !S.book.loading) applyView();
   if (S.book && S.book.pdf && !isFlow()) pdfView.classList.toggle('inv', isDark(c.bg));
 }
+const ICONS = {
+  book: '<path d="M5 4h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H5z" fill="none" stroke="#555" stroke-width="1.6"/><path d="M19 4h-6v16a2 2 0 0 1 2-2h4z" fill="none" stroke="#555" stroke-width="1.6"/>',
+  doc: '<path d="M6 3h8l4 4v14H6z" fill="#fff" stroke="#555" stroke-width="1.6"/><path d="M9 11h6M9 14h6M9 17h4" stroke="#555" stroke-width="1.4"/>',
+  chat: '<path d="M4 5h16v11H9l-5 4z" fill="#fff" stroke="#555" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 9h8M8 12h5" stroke="#555" stroke-width="1.4"/>',
+  sheet: '<rect x="4" y="4" width="16" height="16" rx="1.5" fill="#fff" stroke="#555" stroke-width="1.6"/><path d="M4 9h16M4 14h16M10 4v16" stroke="#555" stroke-width="1.3"/>'
+};
+function applySkin() {
+  const L = S.local, R = $('#reader');
+  R.classList.toggle('skin-chat', L.skin === 'chat'); R.classList.toggle('skin-doc', L.skin === 'doc');
+  $('#skinSide').hidden = L.skin !== 'chat'; $('#skinInput').hidden = L.skin === 'basic'; $('#skinBar').hidden = L.skin !== 'doc';
+  R.style.setProperty('--rmaxw', ({ normal: '44em', wide: '66em', max: 'none' })[L.width] || '44em');
+  document.title = (L.tabTitle || '').trim() || 'Viewer';
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">' + (ICONS[L.tabIcon] || ICONS.book) + '</svg>';
+  $('#fav').href = L.tabIcon && L.tabIcon !== 'book' ? 'data:image/svg+xml,' + encodeURIComponent(svg) : 'icon-192.png';
+  const press = (sel, attr, val) => { for (const b of $(sel).children) b.setAttribute('aria-pressed', b.dataset[attr] === val); };
+  press('#skinChips', 'skin', L.skin); press('#widthChips', 'width', L.width); press('#iconChips', 'icon', L.tabIcon);
+  if (document.activeElement !== $('#tabTitle')) $('#tabTitle').value = L.tabTitle || '';
+  renderSkinSide();
+}
+function renderSkinSide() {
+  if (S.local.skin === 'basic' || !S.book) return;
+  $('#skinDocName').textContent = S.book.name || '';
+  if (S.local.skin !== 'chat') return;
+  const toc = S.book.toc || [], cur = !S.book.loading && getPos() ? getPos().i : 0;
+  let k0 = -1; toc.forEach((x, k) => { if (x.i <= cur) k0 = k; });
+  $('#skinList').innerHTML = toc.length
+    ? toc.slice(0, 2000).map((x, k) => `<button data-sk="${k}" class="${k === k0 ? 'cur' : ''}">${esc(x.title)}</button>`).join('')
+    : `<button class="cur">${esc((S.book.name || '').replace(BOOK_RE, ''))}</button>`;
+}
+function skinStatus() {
+  if (S.local.skin === 'basic' || !S.book || S.book.loading) return;
+  const p = getPos(); if (!p) return;
+  $('#skinStatus').textContent = S.local.skin === 'doc' ? `${(S.book.name || '').replace(BOOK_RE, '')} · 진행 ${pctOf(p.i).toFixed(1)}%` : pctOf(p.i).toFixed(1) + '%';
+  if (S.local.skin === 'chat') { const c = $('#skinList .cur'), toc = S.book.toc || []; let k0 = -1; toc.forEach((x, k) => { if (x.i <= p.i) k0 = k; }); if (!c || +c.dataset.sk !== k0) renderSkinSide(); }
+}
+$('#skinList').onclick = e => { const b = e.target.closest('button[data-sk]'); if (!b || !S.book) return; const x = S.book.toc[+b.dataset.sk]; goTo(x.i, 0); S.book.moved = true; recordPos(); skinStatus(); };
+$('#skinNew').onclick = () => { if (S.book) closeBook(); };
+$('#skinQ').addEventListener('keydown', e => { if (e.key !== 'Enter' || !S.book) return; const q = e.target.value.trim(); e.target.value = ''; if (!q) return; openSheet('find'); $('#findQ').value = q; runFind(); });
+$('#skinBar').onclick = e => {
+  const b = e.target.closest('button[data-act]'); if (!b || !S.book) return;
+  const a = b.dataset.act;
+  if (a === 'smaller' || a === 'bigger') changeSetting({ size: Math.max(LIM.size[0], Math.min(LIM.size[1], S.set.size + (a === 'bigger' ? 1 : -1))) });
+  else if (a === 'find') $('#findBtn').click(); else if (a === 'toc') $('#panelBtn').click();
+};
 async function changeLocal(patch) {
   const keep = S.book && !S.book.loading ? getPos() : null;
   Object.assign(S.local, patch); LS.set('local', S.local);
@@ -2051,6 +2180,10 @@ $('#ufList').onclick = async e => {
 };
 chip('#themeSw', b => changeSetting({ bg: b.dataset.bg, fg: b.dataset.fg }));
 chip('#modeChips', b => changeSetting({ mode: b.dataset.mode }));
+chip('#skinChips', b => changeLocal({ skin: b.dataset.skin }));
+chip('#widthChips', b => changeLocal({ width: b.dataset.width }));
+chip('#iconChips', b => changeLocal({ tabIcon: b.dataset.icon }));
+$('#tabTitle').addEventListener('input', e => { S.local.tabTitle = e.target.value; LS.set('local', S.local); document.title = e.target.value.trim() || 'Viewer'; });
 chip('#syncChips', b => {
   const on = b.dataset.sync === '1'; if (on === !!S.local.syncSet) return;
   S.local.syncSet = on; LS.set('local', S.local);
@@ -2253,7 +2386,8 @@ window.addEventListener('hashchange', () => {
   openLibrary();
   if (hash === '#upload') openUpload();
   else if (hash === '#shared') { const files = await takeShared(); openUpload(files); }
-  else { const o = LS.get('open', null); if (o && o.id) openBook(o.id, o.name); }   // 새로고침·앱 재시작 시 읽던 책 그대로
+  else { const o = LS.get('open', null); if (o && o.id) await openBook(o.id, o.name); }   // 새로고침·앱 재시작 시 읽던 책 그대로
+  if (LS.get('reopenStyle', false)) { LS.del('reopenStyle'); if (S.book) openSheet('style'); }
 })();
 </script>
 </body>
