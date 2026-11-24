@@ -265,7 +265,8 @@ button{cursor:pointer}
 :root.themed{--paper:var(--tbg);--ink:var(--tfg);--card:color-mix(in srgb,var(--tbg) 93%,var(--tfg));
   --line:color-mix(in srgb,var(--tfg) 18%,var(--tbg));--mute:color-mix(in srgb,var(--tfg) 62%,var(--tbg));
   --accent:var(--tfg);--accent-ink:var(--tbg);--warn:color-mix(in srgb,#C0392B 70%,var(--tfg))}
-:root.themed.tdark{color-scheme:dark}
+:root.themed{--card:#FFFFFF}
+:root.themed.tdark{color-scheme:dark;--card:color-mix(in srgb,var(--tbg) 88%,#FFFFFF)}
 :root.eink{--paper:#FFFFFF;--ink:#000000;--mute:#000000;--line:#000000;--card:#FFFFFF;--accent:#000000;--accent-ink:#FFFFFF;--warn:#000000;color-scheme:light}
 .eink *{transition:none!important;animation:none!important;box-shadow:none!important;text-shadow:none!important}
 .eink .chrome{background:var(--rbg)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-color:#000!important;border-width:2px!important}
@@ -383,7 +384,8 @@ button{cursor:pointer}
   <div class="field"><span class="lbl">브라우저 탭 이름·아이콘 (현재 사용하는 기기만 적용)</span>
     <input type="search" id="tabTitle" maxlength="40" placeholder="Viewer">
     <div class="chips" id="iconChips" style="margin-top:8px">
-      <button data-icon="book">책</button><button data-icon="doc">문서</button><button data-icon="chat">대화</button><button data-icon="sheet">표</button></div></div>
+      <button data-icon="book">책</button><button data-icon="doc">문서</button><button data-icon="chat">대화</button><button data-icon="sheet">표</button><button data-icon="custom">내 이미지 선택</button></div>
+    <input type="file" id="iconInput" accept="image/*" hidden></div>
   <div class="field"><label class="toggle">전자잉크 모드 (현재 사용하는 기기만 적용) <input type="checkbox" id="einkToggle"></label>
     <span class="lbl" style="margin-top:6px">흰 바탕·검은 글자 고정, 화면 효과·반투명·그림자 제거, 대비 강화</span></div>
   <div class="field"><span class="lbl">글자 굵기</span><div class="chips" id="weightChips">
@@ -2091,7 +2093,7 @@ function applySkin() {
   R.style.setProperty('--rmaxw', ({ normal: '44em', wide: '66em', max: 'none' })[L.width] || '44em');
   document.title = (L.tabTitle || '').trim() || 'Viewer';
   const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">' + (ICONS[L.tabIcon] || ICONS.book) + '</svg>';
-  $('#fav').href = L.tabIcon && L.tabIcon !== 'book' ? 'data:image/svg+xml,' + encodeURIComponent(svg) : 'icon-192.png';
+  $('#fav').href = L.tabIcon === 'custom' && L.tabIconData ? L.tabIconData : L.tabIcon && L.tabIcon !== 'book' && ICONS[L.tabIcon] ? 'data:image/svg+xml,' + encodeURIComponent(svg) : 'icon-192.png';
   const press = (sel, attr, val) => { for (const b of $(sel).children) b.setAttribute('aria-pressed', b.dataset[attr] === val); };
   press('#skinChips', 'skin', L.skin); press('#widthChips', 'width', L.width); press('#iconChips', 'icon', L.tabIcon);
   if (document.activeElement !== $('#tabTitle')) $('#tabTitle').value = L.tabTitle || '';
@@ -2182,7 +2184,18 @@ chip('#themeSw', b => changeSetting({ bg: b.dataset.bg, fg: b.dataset.fg }));
 chip('#modeChips', b => changeSetting({ mode: b.dataset.mode }));
 chip('#skinChips', b => changeLocal({ skin: b.dataset.skin }));
 chip('#widthChips', b => changeLocal({ width: b.dataset.width }));
-chip('#iconChips', b => changeLocal({ tabIcon: b.dataset.icon }));
+chip('#iconChips', b => { if (b.dataset.icon === 'custom') $('#iconInput').click(); else changeLocal({ tabIcon: b.dataset.icon }); });
+$('#iconInput').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    const url = URL.createObjectURL(f), im = new Image(); im.src = url; await im.decode();
+    const c = document.createElement('canvas'); c.width = c.height = 64;
+    const k = Math.min(64 / im.naturalWidth, 64 / im.naturalHeight), w = im.naturalWidth * k, h = im.naturalHeight * k;
+    c.getContext('2d').drawImage(im, (64 - w) / 2, (64 - h) / 2, w, h); URL.revokeObjectURL(url);
+    changeLocal({ tabIcon: 'custom', tabIconData: c.toDataURL('image/png') });
+    toast('탭 아이콘을 바꿨습니다.');
+  } catch { toast('이미지를 읽을 수 없습니다.'); }
+};
 $('#tabTitle').addEventListener('input', e => { S.local.tabTitle = e.target.value; LS.set('local', S.local); document.title = e.target.value.trim() || 'Viewer'; });
 chip('#syncChips', b => {
   const on = b.dataset.sync === '1'; if (on === !!S.local.syncSet) return;
